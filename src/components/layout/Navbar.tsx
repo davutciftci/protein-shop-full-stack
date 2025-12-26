@@ -75,16 +75,18 @@ export default function Navbar() {
                             {/* Mobile Cart - Icon Only */}
                             <Link
                                 to="/sepetim"
-                                className="md:hidden relative p-2"
+                                className="md:hidden p-2"
                                 aria-label="Sepet"
                             >
-                                <ShoppingCart className="w-6 h-6 text-gray-700" />
-                                <span
-                                    className="absolute top-0 right-0 text-white text-xs rounded-full flex items-center justify-center font-bold"
-                                    style={{ backgroundColor: '#ED2727', height: '18px', width: '18px', fontSize: '10px' }}
-                                >
-                                    0
-                                </span>
+                                <div className="relative">
+                                    <ShoppingCart className="w-6 h-6 text-gray-700" />
+                                    <span
+                                        className="absolute -top-1.5 -right-1.5 text-white text-xs rounded-full flex items-center justify-center font-bold"
+                                        style={{ backgroundColor: '#ED2727', height: '16px', width: '16px', fontSize: '9px' }}
+                                    >
+                                        0
+                                    </span>
+                                </div>
                             </Link>
 
                             {/* Desktop Cart - With Background */}
@@ -94,15 +96,17 @@ export default function Navbar() {
                                 style={{ backgroundColor: '#919191', height: '38px', width: '196px' }}
                                 aria-label="Sepet"
                             >
-                                <div className="relative flex items-center gap-2">
-                                    <ShoppingCart className="w-5 h-5" />
+                                <div className="flex items-center gap-2">
+                                    <div className="relative">
+                                        <ShoppingCart className="w-5 h-5" />
+                                        <span
+                                            className="absolute -top-3 -right-3 text-white text-xs rounded-full flex items-center justify-center font-bold"
+                                            style={{ backgroundColor: '#ED2727', height: '18px', width: '18px', fontSize: '10px' }}
+                                        >
+                                            0
+                                        </span>
+                                    </div>
                                     <span className="text-sm font-semibold">SEPET</span>
-                                    <span
-                                        className="absolute -top-2 -right-2 text-white text-xs rounded-full flex items-center justify-center font-bold"
-                                        style={{ backgroundColor: '#ED2727', height: '20px', width: '20px' }}
-                                    >
-                                        0
-                                    </span>
                                 </div>
                             </Link>
                         </div>
