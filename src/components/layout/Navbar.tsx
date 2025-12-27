@@ -17,10 +17,10 @@ export default function Navbar() {
             <div className=" border-gray-200 bg-white">
                 <div className="container-custom my-6">
                     <div className="flex items-center justify-between h-12 gap-6">
-                        {/* Mobile Menu Button - Left Side */}
+                        {/* Mobile Menu Button - Only Mobile */}
                         <button
                             onClick={toggleMenu}
-                            className="lg:hidden p-2 text-gray-900"
+                            className="md:hidden p-2 text-gray-900 flex-shrink-0"
                             aria-label="Menü"
                         >
                             {isMenuOpen ? (
@@ -39,19 +39,19 @@ export default function Navbar() {
                             />
                         </Link>
 
-                        {/* Search Bar - Desktop */}
-                        <div className="hidden md:flex flex-1 max-w-2xl justify-end">
+                        {/* Search Bar - Desktop/Tablet */}
+                        <div className="hidden md:flex flex-1 justify-center lg:justify-end">
                             <div className="relative flex">
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Aradığınız ürünü yazınız..."
-                                    className="flex-1 px-4 py-2.5 border-gray-300 border-2 rounded-l-md focus:outline-none transition-colors"
-                                    style={{ width: '316px', height: '38px' }}
+                                    className="px-4 py-2.5 border-gray-300 border-2 rounded-l-md focus:outline-none transition-colors w-[200px] lg:w-[316px]"
+                                    style={{ height: '38px' }}
                                 />
                                 <button
-                                    className="text-white px-6 py-2.5 rounded-r-md font-medium transition-colors"
+                                    className="text-white px-4 lg:px-6 py-2.5 rounded-r-md font-medium transition-colors"
                                     style={{ backgroundColor: '#919191', height: '38px' }}
                                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7a7a7a'}
                                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#919191'}
@@ -62,38 +62,22 @@ export default function Navbar() {
                         </div>
 
                         {/* Right Side - Cart & Account */}
-                        <div className="flex items-center space-x-4 flex-shrink-0">
+                        <div className="hidden md:flex items-center space-x-3 lg:space-x-4 flex-shrink-0">
+                            {/* Account Button - Tablet/Desktop */}
                             <button
-                                className="hidden md:flex items-center justify-evenly border-2 border-gray-400 rounded space-x-1 text-gray-700 transition-colors"
-                                style={{ color: '#919191', height: '38px', width: '135px' }}
+                                className="flex items-center justify-center gap-1 border-2 border-gray-400 rounded text-gray-700 transition-colors px-2"
+                                style={{ color: '#919191', height: '38px' }}
                             >
                                 <User className="w-5 h-5" />
                                 <span className="text-sm font-medium">HESAP</span>
                                 <ChevronDown className="w-4 h-4" />
                             </button>
 
-                            {/* Mobile Cart - Icon Only */}
+                            {/* Cart Button - Tablet/Desktop */}
                             <Link
                                 to="/sepetim"
-                                className="md:hidden p-2"
-                                aria-label="Sepet"
-                            >
-                                <div className="relative">
-                                    <ShoppingCart className="w-6 h-6 text-gray-700" />
-                                    <span
-                                        className="absolute -top-1.5 -right-1.5 text-white text-xs rounded-full flex items-center justify-center font-bold"
-                                        style={{ backgroundColor: '#ED2727', height: '16px', width: '16px', fontSize: '9px' }}
-                                    >
-                                        0
-                                    </span>
-                                </div>
-                            </Link>
-
-                            {/* Desktop Cart - With Background */}
-                            <Link
-                                to="/sepetim"
-                                className="hidden md:flex relative items-center justify-center gap-2 text-white rounded transition-colors"
-                                style={{ backgroundColor: '#919191', height: '38px', width: '196px' }}
+                                className="flex relative items-center justify-center gap-2 text-white rounded transition-colors px-3"
+                                style={{ backgroundColor: '#919191', height: '38px' }}
                                 aria-label="Sepet"
                             >
                                 <div className="flex items-center gap-2">
@@ -110,6 +94,23 @@ export default function Navbar() {
                                 </div>
                             </Link>
                         </div>
+
+                        {/* Mobile Cart - Icon Only */}
+                        <Link
+                            to="/sepetim"
+                            className="md:hidden p-2"
+                            aria-label="Sepet"
+                        >
+                            <div className="relative">
+                                <ShoppingCart className="w-6 h-6 text-gray-700" />
+                                <span
+                                    className="absolute -top-1.5 -right-1.5 text-white text-xs rounded-full flex items-center justify-center font-bold"
+                                    style={{ backgroundColor: '#ED2727', height: '16px', width: '16px', fontSize: '9px' }}
+                                >
+                                    0
+                                </span>
+                            </div>
+                        </Link>
                     </div>
                 </div>
             </div>

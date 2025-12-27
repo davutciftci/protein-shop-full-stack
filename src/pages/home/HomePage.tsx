@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, ShoppingCart, Heart, Truck, Shield, CreditCard, Phone } from 'lucide-react';
+import { Star } from 'lucide-react';
+import { PRODUCTS } from '../../data/products';
 
 const PRODUCT_CATEGORIES = [
     { name: 'Protein Tozları', icon: '💪', link: '/urunler?kategori=protein' },
@@ -11,86 +12,7 @@ const PRODUCT_CATEGORIES = [
     { name: 'Kilo Kontrolü', icon: '⚖️', link: '/urunler?kategori=kilo' },
 ];
 
-const FEATURED_PRODUCTS = [
-    {
-        id: 1,
-        name: 'WHEY PROTEIN',
-        description: 'EN ÇOK TERCİH EDİLEN PROTEİN TAKVİYESİ',
-        brand: 'OJS Nutrition',
-        price: 549,
-        oldPrice: null,
-        rating: 5,
-        reviews: 10869,
-        image: '/images/Picture → image_360.webp.png',
-        badge: 'ÇOK SATAN',
-        discountPercentage: null
-    },
-    {
-        id: 2,
-        name: 'FITNESS PAKETİ',
-        description: 'EN POPÜLER ÜRÜNLER BİR ARADA',
-        brand: 'OJS Nutrition',
-        price: 799,
-        oldPrice: 1126,
-        rating: 5,
-        reviews: 7650,
-        image: '/images/Picture → image_360.webp (1).png',
-        badge: 'İNDİRİM',
-        discountPercentage: 29
-    },
-    {
-        id: 3,
-        name: 'GÜNLÜK VİTAMİN PAKETİ',
-        description: 'EN SIK TÜKETİLEN TAKVİYELER',
-        brand: 'OJS Nutrition',
-        price: 549,
-        oldPrice: 717,
-        rating: 5,
-        reviews: 5013,
-        image: '/images/Picture → gunlukvitamin.webp.png',
-        badge: 'İNDİRİM',
-        discountPercentage: 23
-    },
-    {
-        id: 4,
-        name: 'PRE-WORKOUT SUPREME',
-        description: 'ANTRENMAN ÖNCESİ TAKVİYESİ',
-        brand: 'OJS Nutrition',
-        price: 399,
-        oldPrice: null,
-        rating: 5,
-        reviews: 6738,
-        image: '/images/Picture → image_360.webp (2).png',
-        badge: null,
-        discountPercentage: null
-    },
-    {
-        id: 5,
-        name: 'CREAM OF RICE',
-        description: 'EN LEZZETLİ PİRİNÇ KREMASI',
-        brand: 'OJS Nutrition',
-        price: 239,
-        oldPrice: null,
-        rating: 5,
-        reviews: 5216,
-        image: '/images/Picture → image_360.webp (3).png', // Placeholder image from data
-        badge: null,
-        discountPercentage: null
-    },
-    {
-        id: 6,
-        name: 'CREATINE',
-        description: 'EN POPÜLER SPORCU TAKVİYESİ',
-        brand: 'OJS Nutrition',
-        price: 239,
-        oldPrice: null,
-        rating: 5,
-        reviews: 8558,
-        image: '/images/Picture → image_360.webp (4).png', // Placeholder image from data
-        badge: null,
-        discountPercentage: null
-    }
-];
+const FEATURED_PRODUCTS = PRODUCTS;
 
 // Kategori kartları için veri dizisi
 const CATEGORY_CARDS = [
@@ -204,17 +126,17 @@ export default function HomePage() {
                         {FEATURED_PRODUCTS.map((product, index) => {
                             // Mobile-only image and order mapping
                             const mobileImageMap: { [key: number]: string } = {
-                                1: '/images/Picture → image_360.webp (4).png', // WHEY PROTEIN -> Purple C
-                                2: '/images/Picture → image_360.webp (3).png', // FITNESS PAKETİ -> Broccoli
-                                3: '/images/Picture → image_360.webp.png',     // GÜNLÜK VİTAMİN -> 5-HTP
-                                4: '/images/Picture → image_360.webp (1).png', // PRE-WORKOUT -> B-Complex
-                                5: '/images/Picture → gunlukvitamin.webp.png', // CREAM OF RICE -> Betaine
-                                6: '/images/Picture → image_360.webp (2).png'  // CREATINE -> BCAA
+                                1: '/src/img/anasayfa/1.jpg', // WHEY PROTEIN
+                                2: '/src/img/anasayfa/2.jpg', // FITNESS PAKETİ
+                                3: '/src/img/anasayfa/3.jpg', // GÜNLÜK VİTAMİN
+                                4: '/src/img/anasayfa/4.jpg', // PRE-WORKOUT
+                                5: '/src/img/anasayfa/5.jpg', // CREAM OF RICE
+                                6: '/src/img/anasayfa/6.jpg'  // CREATINE
                             };
 
                             return (
                                 <Link
-                                    to={`/urun/${product.id}`}
+                                    to={`/urun/${product.slug}`}
                                     key={product.id}
                                     className="group flex flex-col"
                                     style={{ order: index }}
