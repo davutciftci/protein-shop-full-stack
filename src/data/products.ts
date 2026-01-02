@@ -322,6 +322,262 @@ export const PRODUCTS: Product[] = [
             'Antrenman günlerinde antrenman sonrası alın'
         ],
         fullDescription: 'Saf kreatin monohidrat takviyesi. Kas gücünü ve dayanıklılığı artırır.'
+    },
+    {
+        id: 7,
+        name: 'MILK PROTEIN',
+        slug: 'milk-protein',
+        description: 'TAM PROTEİN KAYNAĞI',
+        brand: 'OJS Nutrition',
+        price: 699,
+        oldPrice: null,
+        pricePerServing: 17.48,
+        rating: 5,
+        reviews: 205,
+        image: '/src/img/anasayfa/milk-protein.png',
+        badge: null,
+        discountPercentage: null,
+        category: 'protein',
+        tags: ['PROTEİN', 'DOĞAL'],
+        aromas: [
+            { name: 'Doğal', color: '#F5F5DC' },
+            { name: 'Çikolata', color: '#4A3728' }
+        ],
+        sizes: [
+            { weight: '1KG', servings: '40 servis' },
+            { weight: '2KG', servings: '80 servis', discount: 8 }
+        ],
+        expirationDate: '09.2025',
+        features: [
+            'Yüksek kaliteli süt proteini',
+            'Tam amino asit profili',
+            'Yavaş ve hızlı emilim dengesi',
+            'Kas gelişimini destekler'
+        ],
+        nutritionInfo: [
+            'Kalori: 110 kcal',
+            'Protein: 25g',
+            'Karbonhidrat: 2g',
+            'Yağ: 1g'
+        ],
+        usage: [
+            '1 ölçek (25g) tozu 200ml su veya süt ile karıştırın',
+            'Günde 1-2 porsiyon tüketin',
+            'Antrenman sonrası ideal'
+        ],
+        fullDescription: 'Süt proteininden elde edilen tam protein kaynağı. Hem kazein hem whey protein içerir.'
+    },
+    {
+        id: 8,
+        name: 'SOYA PROTEIN',
+        slug: 'soya-protein',
+        description: 'VEGAN PROTEİN KAYNAĞI',
+        brand: 'OJS Nutrition',
+        price: 449,
+        oldPrice: null,
+        pricePerServing: 11.23,
+        rating: 5,
+        reviews: 374,
+        image: '/src/img/anasayfa/soya-protein.png',
+        badge: null,
+        discountPercentage: null,
+        category: 'protein',
+        tags: ['VEGAN', 'BİTKİSEL'],
+        aromas: [
+            { name: 'Doğal', color: '#F5F5DC' },
+            { name: 'Vanilya', color: '#F3E5AB' }
+        ],
+        sizes: [
+            { weight: '1KG', servings: '40 servis' }
+        ],
+        expirationDate: '10.2025',
+        features: [
+            '%100 bitkisel protein kaynağı',
+            'Vegan ve vejetaryen uyumlu',
+            'Tam amino asit profili',
+            'Kolay sindirilebilir'
+        ],
+        nutritionInfo: [
+            'Kalori: 100 kcal',
+            'Protein: 23g',
+            'Karbonhidrat: 1g',
+            'Yağ: 0.5g'
+        ],
+        usage: [
+            '1 ölçek (25g) tozu 200ml su veya bitki sütü ile karıştırın',
+            'Günde 1-2 porsiyon tüketin'
+        ],
+        fullDescription: 'Soya fasulyesinden elde edilen yüksek kaliteli bitkisel protein.'
+    },
+    {
+        id: 9,
+        name: 'PROTEIN BAR 2\'Lİ PAKET',
+        slug: 'protein-bar-2li',
+        description: '%30 PROTEİN, ŞEKER İLAVESİZ',
+        brand: 'OJS Nutrition',
+        price: 59,
+        oldPrice: 90,
+        pricePerServing: 29.5,
+        rating: 5,
+        reviews: 180,
+        image: '/src/img/anasayfa/protein-bar-2paket.png',
+        badge: 'İNDİRİM',
+        discountPercentage: 34,
+        category: 'protein',
+        tags: ['ATIŞMIRALIK', 'PROTEİN'],
+        aromas: [
+            { name: 'Çikolata', color: '#4A3728' },
+            { name: 'Fıstık', color: '#C68642' }
+        ],
+        sizes: [
+            { weight: '2x45g', servings: '2 bar' }
+        ],
+        expirationDate: '06.2025',
+        features: [
+            '%30 protein içeriği',
+            'Şeker ilavesiz',
+            'Pratik atıştırmalık',
+            'Lezzetli ve doyurucu'
+        ],
+        nutritionInfo: [
+            'Kalori: 150 kcal',
+            'Protein: 14g',
+            'Karbonhidrat: 15g',
+            'Yağ: 5g'
+        ],
+        usage: [
+            'Ara öğün olarak tüketin',
+            'Antrenman öncesi veya sonrası ideal'
+        ],
+        fullDescription: 'Şeker ilavesiz, yüksek proteinli lezzetli bar.'
+    },
+    {
+        id: 10,
+        name: 'MASS GAINER LANSMAN',
+        slug: 'mass-gainer',
+        description: 'YÜKSEK KALORİLİ PROTEİN ÖĞÜN',
+        brand: 'OJS Nutrition',
+        price: 699,
+        oldPrice: 999,
+        pricePerServing: 23.3,
+        rating: 5,
+        reviews: 329,
+        image: '/src/img/anasayfa/mass-gainer-lansman.png',
+        badge: 'İNDİRİM',
+        discountPercentage: 30,
+        category: 'protein',
+        tags: ['KÜTLE', 'KARBONHİDRAT'],
+        aromas: [
+            { name: 'Çikolata', color: '#4A3728' },
+            { name: 'Vanilya', color: '#F3E5AB' }
+        ],
+        sizes: [
+            { weight: '3KG', servings: '30 servis' }
+        ],
+        expirationDate: '08.2025',
+        features: [
+            'Yüksek kalori içeriği',
+            'Protein ve karbonhidrat dengesi',
+            'Kilo almak isteyenler için',
+            'Lezzetli formül'
+        ],
+        nutritionInfo: [
+            'Kalori: 450 kcal',
+            'Protein: 30g',
+            'Karbonhidrat: 70g',
+            'Yağ: 5g'
+        ],
+        usage: [
+            '100g tozu 400ml süt ile karıştırın',
+            'Günde 1-2 porsiyon tüketin',
+            'Öğün arası veya antrenman sonrası'
+        ],
+        fullDescription: 'Kilo ve kütle almak isteyenler için yüksek kalorili formül.'
+    },
+    {
+        id: 11,
+        name: 'PROTEIN BAR',
+        slug: 'protein-bar',
+        description: '%30 PROTEİN, ŞEKER İLAVESİZ',
+        brand: 'OJS Nutrition',
+        price: 249,
+        oldPrice: 349,
+        pricePerServing: 20.75,
+        rating: 5,
+        reviews: 504,
+        image: '/src/img/anasayfa/protein-bar.png',
+        badge: 'İNDİRİM',
+        discountPercentage: 29,
+        category: 'protein',
+        tags: ['ATIŞMIRALIK', 'PROTEİN'],
+        aromas: [
+            { name: 'Çikolata', color: '#4A3728' },
+            { name: 'Karamel', color: '#C68642' },
+            { name: 'Fıstık', color: '#8B7355' }
+        ],
+        sizes: [
+            { weight: '12x45g', servings: '12 bar' }
+        ],
+        expirationDate: '07.2025',
+        features: [
+            '%30 protein içeriği',
+            'Şeker ilavesiz',
+            '12 bar avantajlı paket',
+            'Lezzetli ve doyurucu'
+        ],
+        nutritionInfo: [
+            'Kalori: 150 kcal',
+            'Protein: 14g',
+            'Karbonhidrat: 15g',
+            'Yağ: 5g'
+        ],
+        usage: [
+            'Ara öğün olarak tüketin',
+            'Antrenman öncesi veya sonrası ideal'
+        ],
+        fullDescription: '12 adet protein bar içeren avantajlı paket.'
+    },
+    {
+        id: 12,
+        name: 'COLLAGEN COFFEE',
+        slug: 'collagen-coffee',
+        description: 'KOLAJENLİ KAHVE',
+        brand: 'OJS Nutrition',
+        price: 349,
+        oldPrice: null,
+        pricePerServing: 11.63,
+        rating: 5,
+        reviews: 377,
+        image: '/src/img/anasayfa/collagen-coffee.png',
+        badge: null,
+        discountPercentage: null,
+        category: 'protein',
+        tags: ['KOLAJEN', 'KAHVE'],
+        aromas: [
+            { name: 'Kahve', color: '#6F4E37' }
+        ],
+        sizes: [
+            { weight: '300g', servings: '30 servis' }
+        ],
+        expirationDate: '12.2025',
+        features: [
+            'Kolajen peptitleri içerir',
+            'Premium kahve karışımı',
+            'Cilt sağlığını destekler',
+            'Enerji verir'
+        ],
+        nutritionInfo: [
+            'Kalori: 35 kcal',
+            'Protein: 5g',
+            'Kolajen: 5g',
+            'Kafein: 80mg'
+        ],
+        usage: [
+            '1 ölçek (10g) tozu 150ml sıcak su ile karıştırın',
+            'Günde 1-2 porsiyon tüketin',
+            'Sabah kahvesi yerine ideal'
+        ],
+        fullDescription: 'Kolajen peptitleri ile zenginleştirilmiş premium kahve.'
     }
 ];
 

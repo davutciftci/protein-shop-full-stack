@@ -4,6 +4,10 @@ import Layout from '../components/layout/Layout';
 // Pages
 import HomePage from '../pages/home/HomePage';
 import ProductDetailPage from '../pages/products/ProductDetailPage';
+import AllProductsPage from '../pages/products/AllProductsPage';
+import ProteinPage from '../pages/categories/ProteinPage';
+import ContactPage from '../pages/contact/ContactPage';
+import ReviewsPage from '../pages/reviews/ReviewsPage';
 
 export const router = createBrowserRouter([
     {
@@ -17,6 +21,22 @@ export const router = createBrowserRouter([
             {
                 path: 'urun/:slug',
                 element: <ProductDetailPage />,
+            },
+            {
+                path: 'protein',
+                element: <ProteinPage />,
+            },
+            {
+                path: 'urunler',
+                element: <AllProductsPage />,
+            },
+            {
+                path: 'iletisim',
+                element: <ContactPage />,
+            },
+            {
+                path: 'yorumlar',
+                element: <ReviewsPage />,
             }
         ]
     },

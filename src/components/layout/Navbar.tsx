@@ -4,10 +4,12 @@ import { ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react';
 import { CiFaceSmile } from "react-icons/ci";
 import { TfiPackage } from 'react-icons/tfi';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
+import { useCart } from '../../context/CartContext';
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const { totalItems, openCart } = useCart();
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -74,10 +76,11 @@ export default function Navbar() {
                             </button>
 
                             {/* Cart Button - Tablet/Desktop */}
-                            <Link
-                                to="/sepetim"
+                            {/* Cart Button - Tablet/Desktop */}
+                            <button
+                                onClick={openCart}
                                 className="flex relative items-center justify-center gap-2 text-white rounded transition-colors px-3"
-                                style={{ backgroundColor: '#919191', height: '38px' }}
+                                style={{ backgroundColor: '#919191', height: '38px', width: '111px' }}
                                 aria-label="Sepet"
                             >
                                 <div className="flex items-center gap-2">
@@ -85,19 +88,20 @@ export default function Navbar() {
                                         <ShoppingCart className="w-5 h-5" />
                                         <span
                                             className="absolute -top-3 -right-3 text-white text-xs rounded-full flex items-center justify-center font-bold"
-                                            style={{ backgroundColor: '#ED2727', height: '18px', width: '18px', fontSize: '10px' }}
+                                            style={{ backgroundColor: '#ED2727', height: '16px', width: '16px', fontSize: '10px' }}
                                         >
-                                            0
+                                            {totalItems}
                                         </span>
                                     </div>
                                     <span className="text-sm font-semibold">SEPET</span>
                                 </div>
-                            </Link>
+                            </button>
                         </div>
 
                         {/* Mobile Cart - Icon Only */}
-                        <Link
-                            to="/sepetim"
+                        {/* Mobile Cart - Icon Only */}
+                        <button
+                            onClick={openCart}
                             className="md:hidden p-2"
                             aria-label="Sepet"
                         >
@@ -107,23 +111,26 @@ export default function Navbar() {
                                     className="absolute -top-1.5 -right-1.5 text-white text-xs rounded-full flex items-center justify-center font-bold"
                                     style={{ backgroundColor: '#ED2727', height: '16px', width: '16px', fontSize: '9px' }}
                                 >
-                                    0
+                                    {totalItems}
                                 </span>
                             </div>
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* Second Row - Black Background - Main Categories */}
-            <div className="hidden lg:block bg-gray-900 text-white">
+            {/* Second Row - Black Background - Main Categories - Tablet & Desktop */}
+            <div className="hidden md:block bg-gray-900 text-white">
                 <div className="container-custom">
                     <div className="flex items-center justify-between h-8">
-                        <Link to="/urunler?kategori=protein" className="text-semibold">
+                        <Link to="/protein" className="text-semibold">
                             PROTEİN
                         </Link>
                         <Link to="/urunler?kategori=spor-gidalari" className="text-semibold">
                             SPOR GIDALARI
+                        </Link>
+                        <Link to="/urunler" className="text-semibold">
+                            TÜM ÜRÜNLER
                         </Link>
                         <Link to="/urunler?kategori=saglik" className="text-semibold">
                             SAĞLIK
@@ -131,32 +138,32 @@ export default function Navbar() {
                         <Link to="/urunler?kategori=gida" className="text-semibold">
                             GIDA
                         </Link>
-                        <Link to="/urunler?kategori=vitamin" className=" text-semibold">
+                        <Link to="/urunler?kategori=vitamin" className="text-semibold">
                             VİTAMİN
-                        </Link>
-                        <Link to="/tum-urunler" className="text-semibold">
-                            TÜM ÜRÜNLER
                         </Link>
                     </div>
                 </div>
             </div>
 
-            {/* Third Row - Info Bar */}
-            <div className="hidden lg:block bg-gray-100 border-b border-gray-200">
+            {/* Third Row - Info Bar - Tablet & Desktop */}
+            <div className="hidden md:block bg-gray-100 border-b border-gray-200">
                 <div className="container-custom">
                     <div className="flex items-center justify-center h-10 text-xs">
-                        <div className="flex items-center justify-around w-full space-x-6 text-gray-700">
+                        <div className="flex items-center justify-around w-full space-x-4 lg:space-x-6 text-gray-700">
                             <div className='flex items-center gap-2'>
-                                <TfiPackage className="w-6 h-6 font-extrabold" />
-                                <span className="font-extrabold">AYNI GÜN KARGO<span className="font-semibold"> - 16.00'DAN ÖNCEKİ SİPARİŞLERDE</span></span>
+                                <TfiPackage className="w-5 h-5 lg:w-6 lg:h-6 font-extrabold" />
+                                <span className="font-extrabold text-center">AYNI GÜN KARGO    </span>
+                                <span className="font-semibold text-center">16.00'DAN ÖNCEKİ SİPARİŞLERDE</span>
                             </div>
                             <div className='flex items-center gap-2'>
-                                <CiFaceSmile className="w-6 h-6 font-extrabold" />
-                                <span className="font-extrabold">ÜCRETSİZ KARGO<span className="font-semibold"> - 100 TL ÜZERİ SİPARİŞLERDE</span></span>
+                                <CiFaceSmile className="w-5 h-5 lg:w-6 lg:h-6 font-extrabold" />
+                                <span className="font-extrabold text-center">ÜCRETSİZ KARGO</span>
+                                <span className="font-semibold text-center">100 TL ÜZERİ SİPARİŞLERDE</span>
                             </div>
                             <div className='flex items-center gap-2'>
-                                <AiOutlineSafetyCertificate className="w-6 h-6 font-extrabold" />
-                                <span className="font-extrabold">GÜVENLİ ALIŞVERİŞ<span className="font-semibold"> - 1.000.000+ MUTLU MÜŞTERİ</span></span>
+                                <AiOutlineSafetyCertificate className="w-5 h-5 lg:w-6 lg:h-6 font-extrabold" />
+                                <span className="font-extrabold text-center">GÜVENLİ ALIŞVERİŞ</span>
+                                <span className="font-semibold text-center">1.000.000+ MUTLU MÜŞTERİ</span>
                             </div>
                         </div>
                     </div>
