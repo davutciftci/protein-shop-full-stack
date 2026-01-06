@@ -1,13 +1,18 @@
 
+interface ContactPageProps {
+    hideHeaderAndFooter?: boolean;
+}
 
-const ContactPage = () => {
+const ContactPage = ({ hideHeaderAndFooter = false }: ContactPageProps) => {
     return (
-        <div className="bg-white min-h-screen py-16">
+        <div className="bg-white min-h-screen py-28">
             <div className="container-custom mx-auto px-4">
                 {/* Header Section */}
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl md:text-5xl font-black mb-4">Bize Ulaşın</h1>
-                </div>
+                {!hideHeaderAndFooter && (
+                    <div className="text-center mb-12">
+                        <h1 className="text-4xl md:text-5xl font-black mb-4">Bize Ulaşın</h1>
+                    </div>
+                )}
                 <div className="max-w-3xl mx-auto mb-6 text-left">
                     <p className="text-gray-600 text-sm md:text-base">
                         Bize aşağıdaki iletişim formundan ulaşabilirsiniz.
@@ -71,20 +76,22 @@ const ContactPage = () => {
                     </form>
 
                     {/* Footer Info Text */}
-                    <div className="mt-12 text-center space-y-4">
-                        <p className="text-[12px] font-medium text-black">
-                            *Aynı gün kargo hafta içi 16:00, Cumartesi ise 11:00'e kadar verilen siparişler için geçerlidir.
-                        </p>
-                        <p className="text-[12px] font-medium text-black">
-                            Siparişler kargoya verilince e-posta ve sms ile bilgilendirme yapılır.
-                        </p>
+                    {!hideHeaderAndFooter && (
+                        <div className="mt-12 text-center space-y-4">
+                            <p className="text-[12px] font-medium text-black">
+                                *Aynı gün kargo hafta içi 16:00, Cumartesi ise 11:00'e kadar verilen siparişler için geçerlidir.
+                            </p>
+                            <p className="text-[12px] font-medium text-black">
+                                Siparişler kargoya verilince e-posta ve sms ile bilgilendirme yapılır.
+                            </p>
 
-                        <div className="pt-2 text-[12px] font-medium text-center text-black leading-relaxed max-w-2xl mx-auto">
-                            Telefon ile <span className="font-bold">0850 303 29 89 </span>
-                            numarasını arayarak da bizlere sesli mesaj bırakabilirsiniz. Sesli mesajlarınıza hafta içi saat
-                            <span className="font-bold"> 09:00-17:00</span> arasında dönüş sağlanmaktadır.
+                            <div className="pt-2 text-[12px] font-medium text-center text-black leading-relaxed max-w-2xl mx-auto">
+                                Telefon ile <span className="font-bold">0850 303 29 89 </span>
+                                numarasını arayarak da bizlere sesli mesaj bırakabilirsiniz. Sesli mesajlarınıza hafta içi saat
+                                <span className="font-bold"> 09:00-17:00</span> arasında dönüş sağlanmaktadır.
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

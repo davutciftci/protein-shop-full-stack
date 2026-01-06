@@ -8,6 +8,7 @@ import AllProductsPage from '../pages/products/AllProductsPage';
 import ProteinPage from '../pages/categories/ProteinPage';
 import ContactPage from '../pages/contact/ContactPage';
 import ReviewsPage from '../pages/reviews/ReviewsPage';
+import FAQPage from '../pages/faq/FAQPage';
 
 export const router = createBrowserRouter([
     {
@@ -37,6 +38,10 @@ export const router = createBrowserRouter([
             {
                 path: 'yorumlar',
                 element: <ReviewsPage />,
+            },
+            {
+                path: 'S.S.S',
+                element: <FAQPage />,
             }
         ]
     },

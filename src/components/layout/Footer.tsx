@@ -16,7 +16,7 @@ export default function Footer() {
         ojsNutrition: [
             { name: 'İletişim', link: '/iletisim' },
             { name: 'Hakkımızda', link: '/hakkimizda' },
-            { name: 'Sıkça Sorulan Sorular', link: '/sss' },
+            { name: 'Sıkça Sorulan Sorular', link: '/S.S.S' },
             { name: 'KVKK', link: '/kvkk' },
             { name: 'Çalışma İlkelerimiz', link: '/ilkelerimiz' },
             { name: 'Satış Sözleşmesi', link: '/sozlesme' },

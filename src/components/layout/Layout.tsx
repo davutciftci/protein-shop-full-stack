@@ -14,7 +14,7 @@ export default function Layout() {
             <div className="min-h-screen flex flex-col">
                 <Navbar />
                 <Outlet />
-                {!isProductPage && location.pathname !== '/iletisim' && <FooterBanner />}
+                {!isProductPage && location.pathname !== '/iletisim' && location.pathname !== '/S.S.S' && <FooterBanner />}
                 <Footer />
             </div>
             <CartSidepanel />
