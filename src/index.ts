@@ -1,7 +1,8 @@
 import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
-import userRouter from './routers/user';
-import categoryRouter from './routers/category';
+import userRouter from './routes/user';
+import categoryRouter from './routes/category';
+import productRouter from './routes/product';
 import { errorHandler } from './middlewares/errorMiddleware';
 
 dotenv.config();
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 //routes
 app.use('/api/user', userRouter);
 app.use('/api/categories', categoryRouter);
+app.use('/api/products', productRouter);
 
 // Test endpoint (health check)
 app.get('/health', (req: Request, res: Response) => {
