@@ -6,6 +6,7 @@ import productRouter from './routes/product';
 import productVariantRouter from './routes/productVariant';
 import productPhotoRouter from './routes/productPhoto';
 import productCommentRouter from './routes/productComment';
+import userAddressRouter from './routes/userAddress';
 import { errorHandler } from './middlewares/errorMiddleware';
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use('/api/products', productRouter);
 app.use('/api/variants', productVariantRouter);
 app.use('/api/photos', productPhotoRouter);
 app.use('/api/comments', productCommentRouter);
+app.use('/api/addresses', userAddressRouter);
 
 // Test endpoint (health check)
 app.get('/health', (req: Request, res: Response) => {

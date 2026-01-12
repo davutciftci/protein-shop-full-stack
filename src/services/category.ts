@@ -28,7 +28,7 @@ export const createCategory = async (data: {
     slug: string;
     isActive?: boolean
 }) => {
-    // slug ve name kontrolü
+
     const existingCategory = await prisma.category.findFirst({
         where: {
             OR: [
@@ -66,7 +66,6 @@ export const updateCategory = async (
 }
 
 export const deleteCategory = async (id: number) => {
-    //once kategori var mı diye kontrol eder
 
     await getCategoryById(id);
 

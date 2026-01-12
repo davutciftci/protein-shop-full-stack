@@ -15,7 +15,6 @@ router.get('/profile', authenticate, getProfile);
 router.get('/admin-only', authenticate, requireRole(UserRole.ADMIN), (req, res) => {
     res.json({
         status: 'success',
-        message: 'Bu endpoint sadece ADMIN içindir',
         user: (req as AuthenticatedRequest).user
     })
 })
