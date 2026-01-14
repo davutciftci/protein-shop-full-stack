@@ -10,6 +10,7 @@ import userAddressRouter from './routes/userAddress';
 import cartRouter from './routes/cart';
 import orderRouter from './routes/order';
 import { errorHandler } from './middlewares/error';
+import path from 'path';
 
 dotenv.config();
 
@@ -20,6 +21,12 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 // urlencoded formatındaki requestler 
 app.use(express.urlencoded({ extended: true }));
+
+// static file serving
+const uploadsPath = path.join(process.cwd(), "uploads");
+console.log('[Server] CWD:', process.cwd());
+console.log('[Server] Static files served from:', uploadsPath);
+app.use('/uploads', express.static(uploadsPath));
 
 //routes
 app.use('/api/user', userRouter);

@@ -18,6 +18,26 @@ export const errorHandler = (
         });
     }
 
+    // Multer errors
+    if (err.name === 'MulterError') {
+        if (err.message.includes('File too large')) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Dosya boyutu çok büyük (maksimum 5MB)'
+            });
+        }
+        if (err.message.includes('Unexpected field')) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Beklenmeyen dosya alanı'
+            });
+        }
+        return res.status(400).json({
+            status: 'error',
+            message: `Dosya yükleme hatası: ${err.message}`
+        });
+    }
+
     if (err instanceof AppError) {
         return res.status(err.statusCode).json({
             status: 'error',

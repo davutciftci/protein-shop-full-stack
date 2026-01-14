@@ -52,3 +52,26 @@ export const updatePhotoSchema = z.object({
         .nonnegative('Display order negatif olamaz')
         .optional(),
 });
+
+
+export const uploadPhotoSchema = z.object({
+    productId: z
+        .string({ message: 'Ürün ID gerekli' })
+        .transform((val) => parseInt(val))
+        .pipe(z.number().int().positive()),
+
+    altText: z
+        .string()
+        .max(200, 'Alt text en fazla 200 karakter olmalı')
+        .optional(),
+
+    isPrimary: z
+        .string()
+        .optional()
+        .default('false'),
+
+    displayOrder: z
+        .string()
+        .optional()
+        .default('0'),
+});

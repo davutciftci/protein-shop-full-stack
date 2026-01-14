@@ -7,6 +7,7 @@ import {
     deletePhoto,
 } from '../services/productPhoto';
 import { AuthenticatedRequest } from '../middlewares/auth';
+import { BadRequestError } from '../utils/customErrors';
 
 
 export const getProductPhotos = async (
@@ -79,6 +80,40 @@ export const createNewPhoto = async (
         next(error);
     }
 };
+
+export const uploadPhoto = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('[PhotoController] uploadPhoto - File:', req.file);
+        console.log('[PhotoController] uploadPhoto - Body', req.body)
+
+        if (!req.file) {
+            throw new BadRequestError("Dosya yüklenemedi")
+        }
+
+        const { productId, altText, isPrimary, displayOrder } = req.body;
+
+        const fileUrl = `/uploads/${req.file.filename}`;
+        console.log(`[PhotoController] uploadPhoto - File Url:`, fileUrl);
+
+        const photo = await createPhoto({
+            url: fileUrl,
+            altText,
+            isPrimary: isPrimary === "true",
+            displayOrder: displayOrder ? parseInt(displayOrder) : 0,
+            productId: parseInt(productId)
+        });
+        console.log('[PhotoController] uploadPhoto - Success, photo ID:', photo.id);
+
+        res.status(202).json({
+            status: 'success',
+            message: 'Fotoğraf başarıyla yüklendi',
+            data: photo,
+        })
+    } catch (error) {
+        console.log('[PhotoController] uploadPhoto - Error:', error);
+        next(error);
+    }
+}
 
 export const updatePhotoById = async (
     req: Request,
