@@ -2,6 +2,7 @@ import prisma from "../utils/prisma"
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import { ConflictError, UnauthorizedError } from "../utils/customErrors";
+import { sendWelcomeEmail } from "./mail";
 
 export const createUser = async (userData: {
     firstName: string;
@@ -39,6 +40,8 @@ export const createUser = async (userData: {
             birthDay: userData.birthDay
         }
     })
+
+    sendWelcomeEmail(user.email, user.firstName).catch(err => console.error(err));
 
     return user;
 }

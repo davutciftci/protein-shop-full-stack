@@ -1,6 +1,7 @@
 import prisma from '../utils/prisma';
 import { NotFoundError, BadRequestError, UnauthorizedError } from '../utils/customErrors';
 import { OrderStatus } from '../../generated/prisma';
+import { sendOrderCancelledEmail, sendOrderConfirmationEmail, sendOrderShippedEmail } from './mail';
 
 const generateOrderNumber = async (): Promise<string> => {
     const year = new Date().getFullYear();
@@ -262,7 +263,15 @@ export const createOrder = async (
 
     console.log('[OrderService] Order created successfully:', order.id, 'Order number:', orderNumber);
 
-    return await getOrderById(order.id);
+    // Sipariş detaylarını al
+    const fullOrder = await getOrderById(order.id);
+
+    // Sipariş onay emaili gönder (asenkron)
+    sendOrderConfirmationEmail(fullOrder).catch(err => {
+        console.error('[OrderService] Order confirmation email failed:', err);
+    });
+
+    return fullOrder;
 };
 
 export const updateOrderStatus = async (
@@ -320,7 +329,20 @@ export const updateOrderStatus = async (
     });
 
     console.log('[OrderService] Order status updated:', updatedOrder.id);
-    return await getOrderById(orderId);
+    const fullOrder = await getOrderById(orderId);
+
+    if (status === OrderStatus.SHIPPED) {
+        sendOrderShippedEmail(fullOrder).catch(err => {
+            console.error('[OrderService] Failed to send order shipped email: ', err);
+        });
+    }
+
+    if (status === OrderStatus.CANCELLED) {
+        sendOrderCancelledEmail(fullOrder).catch(err => {
+            console.error('[OrderService] Failed to send order cancelled email: ', err);
+        });
+    }
+    return fullOrder;
 };
 
 export const cancelOrder = async (orderId: number, userId: number, cancelReason: string) => {
