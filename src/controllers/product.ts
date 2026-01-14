@@ -1,12 +1,74 @@
 import { Request, Response, NextFunction } from 'express';
 import {
-    getAllProducts,
     getProductById,
     createProduct,
     updateProduct,
     deleteProduct,
+    searchAndFilterProducts,
+    getPaginatedProducts,
 } from '../services/product';
 import { AuthenticatedRequest } from '../middlewares/auth';
+
+export const searchProducts = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('[ProductController] serarchProducts - Query:', req.query)
+        const filters = {
+            search: req.query.search as string,
+            categoryId: req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined,
+            minPrice: req.query.minPrice ? parseFloat(req.query.minpPrice as string) : undefined,
+            maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined,
+            activeOnly: req.query.activeOnly === 'true',
+            sortBy: req.query.sortBy as string
+
+        };
+
+        const products = await searchAndFilterProducts(filters);
+
+        console.log('[ProductController] serarchProducts - Success, returned:', products.length, 'products');
+
+        res.status(200).json({
+            status: 'success',
+            results: products.length,
+            filter: filters,
+            data: products,
+        });
+    } catch (error) {
+        console.log('[ProductController] serarchProducts - Error:', error);
+        next(error);
+    }
+}
+
+export const getPaginatedProductsList = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('[ProductController] getPaginatedProducts - Query params:', req.query);
+
+        const page = req.query.page ? parseInt(req.query.page as string) : 1;
+        const limit = req.query.limit ? parseInt(req.query.limit as string) : 12;
+
+        const filters = {
+            search: req.query.search as string,
+            categoryId: req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined,
+            minPrice: req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined,
+            maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined,
+            activeOnly: req.query.activeOnly === 'true',
+            sortBy: req.query.sortBy as string,
+        }
+
+        const result = await getPaginatedProducts(filters, page, limit);
+
+        console.log('[ProductController] getPaginatedProducts - Success');
+
+        res.status(200).json({
+            status: 'success',
+            data: result.products,
+            pagination: result.pagination,
+            filters: filters,
+        });
+    } catch (error) {
+        console.log('[ProductController] getPaginatedProducts - Error:', error);
+        next(error);
+    }
+}
 
 export const getProducts = async (
     req: Request,
@@ -23,7 +85,7 @@ export const getProducts = async (
             maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined,
         };
 
-        const products = await getAllProducts(filters);
+        const products = await searchAndFilterProducts(filters);
 
         console.log('[ProductController] getProducts - Success, returned:', products.length, 'products');
 

@@ -2,16 +2,25 @@ import prisma from '../utils/prisma';
 import { ConflictError, NotFoundError, BadRequestError } from '../utils/customErrors';
 
 interface ProductFilters {
+    search?: string;
     categoryId?: number;
     activeOnly?: boolean;
     minPrice?: number;
     maxPrice?: number;
+    sortBy?: string;
 }
 
-export const getAllProducts = async (filters: ProductFilters = {}) => {
+export const searchAndFilterProducts = async (filters: ProductFilters = {}) => {
     console.log('[ProductService] getAllProducts called with filters:', filters);
 
     const where: any = {};
+
+    if (filters.search) {
+        where.name = {
+            contains: filters.search,
+            mode: 'insensitive'
+        }
+    }
 
     if (filters.categoryId) {
         where.categoryId = filters.categoryId;
@@ -33,17 +42,162 @@ export const getAllProducts = async (filters: ProductFilters = {}) => {
         }
     }
 
+    let orderBy: any = { createdAt: 'desc' };
+
+    if (filters.sortBy) {
+        switch (filters.sortBy) {
+            case 'price_asc':
+                orderBy = { price: 'asc' };
+                break;
+            case 'price_desc':
+                orderBy = { price: ' desc' }
+                break
+            case 'name_asc':
+                orderBy = { name: 'asc' }
+                break;
+            case 'name_desc':
+                orderBy = { name: 'desc' }
+                break;
+            case 'newest':
+                orderBy = { name: 'desc' }
+                break;
+            case 'oldest':
+                orderBy = { createdAt: 'asc' }
+                break;
+        }
+    }
+
     const products = await prisma.product.findMany({
         where,
         include: {
-            category: true,
+            category: {
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                }
+            },
+            photos: {
+                where: { isPrimary: true },
+                take: 1,
+            },
+            variants: {
+                select: {
+                    id: true,
+                    name: true,
+                    price: true,
+                    stockCount: true,
+                }
+            }
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy,
     });
 
     console.log('[ProductService] Found products:', products.length);
     return products;
 };
+
+export const getPaginatedProducts = async (filters: ProductFilters, page: number = 1, limit: number = 12) => {
+    console.log('[ProductService] getpaginatedProducts - Page:', page, 'Limit:', limit, 'Filters:', filters);
+    const where: any = {};
+
+    if (filters.search) {
+        where.name = {
+            contains: filters.search,
+            mode: 'insensitive'
+        };
+    }
+
+    if (filters.activeOnly) {
+        where.isActive = true;
+    }
+
+    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+        where.price = {};
+
+        if (filters.minPrice !== undefined) {
+            where.price.gte = filters.minPrice;
+        }
+
+        if (filters.maxPrice !== undefined) {
+            where.price.lte = filters.maxPrice;
+        }
+    }
+
+    let orderBy: any = { createdAt: 'desc' };
+
+    if (filters.sortBy) {
+        switch (filters.sortBy) {
+            case 'price_asc':
+                orderBy = { price: 'asc' };
+                break;
+            case 'price_desc':
+                orderBy = { price: 'desc' };
+                break;
+            case 'name_asc':
+                orderBy = { name: 'asc' };
+                break;
+            case 'name_desc':
+                orderBy = { name: 'desc' };
+                break;
+            case 'newest':
+                orderBy = { createdAt: 'desc' };
+                break;
+            case 'oldest':
+                orderBy = { createdAt: 'asc' };
+                break;
+        }
+    }
+
+    const totalProducts = await prisma.product.count({ where });
+
+    const totalPages = Math.ceil(totalProducts / limit);
+    const skip = (page - 1) * limit;
+
+    const products = await prisma.product.findMany({
+        where,
+        include: {
+            category: {
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                }
+            },
+            photos: {
+                where:
+                    { isPrimary: true },
+                take: 1,
+            },
+            variants: {
+                select: {
+                    id: true,
+                    name: true,
+                    price: true,
+                    stockCount: true,
+                },
+            },
+        },
+        orderBy,
+        skip,
+        take: limit,
+    });
+
+    console.log('[ProductService] Found paginated products:', products.length, '/', totalProducts);
+
+    return {
+        products,
+        pagination: {
+            currentPage: page,
+            totalPages,
+            totalProducts,
+            productsPerPage: limit,
+            hasNextPage: page < totalPages,
+            hasPreviousPage: page > 1,
+        }
+    }
+}
+
 
 export const getProductById = async (id: number) => {
     console.log('[ProductService] getProductById called with id:', id);

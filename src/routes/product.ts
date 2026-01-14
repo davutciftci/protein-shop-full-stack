@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UserRole } from "../../generated/prisma";
-import { getProduct, getProducts, createNewProduct, deleteProductById, updateProductById } from "../controllers/product";
+import { getProduct, getProducts, createNewProduct, deleteProductById, updateProductById, searchProducts, getPaginatedProductsList } from "../controllers/product";
 import { authenticate } from "../middlewares/auth";
 import { requireRole } from "../middlewares/role";
 import { validate } from "../middlewares/validate";
@@ -13,7 +13,8 @@ router.use((req, res, next) => {
     console.log(`[$ProductRoutes] ${req.method} ${req.originalUrl}`)
     next()
 })
-
+router.get('/search', searchProducts);
+router.get('/paginated', getPaginatedProductsList)
 router.get("/", getProducts)
 router.get("/:id", getProduct);
 
