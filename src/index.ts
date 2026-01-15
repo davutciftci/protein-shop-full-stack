@@ -9,6 +9,7 @@ import productCommentRouter from './routes/productComment';
 import userAddressRouter from './routes/userAddress';
 import cartRouter from './routes/cart';
 import orderRouter from './routes/order';
+import paymentRouter from './routes/payment';
 import { errorHandler } from './middlewares/error';
 import path from 'path';
 import adminStatsRouter from './routes/adminStats';
@@ -38,6 +39,7 @@ app.use('/api/comments', productCommentRouter);
 app.use('/api/addresses', userAddressRouter);
 app.use('/api/cart', cartRouter);
 app.use('/api/orders', orderRouter);
+app.use('/api/payments', paymentRouter);
 app.use('/api/admin/stats', adminStatsRouter);
 
 // Test endpoint (health check)

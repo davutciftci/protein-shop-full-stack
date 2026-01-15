@@ -60,10 +60,8 @@ model Product {
   variants    ProductVariant[]
   photos      ProductPhoto[]
   comments    ProductComment[]
-
-  //ileride order ilişkisi eklenecek
-  //cartItems CartItem[]
-  //orderItems OrderItem[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
 
   @@index([categoryId])
   @@index([slug])
@@ -71,18 +69,17 @@ model Product {
 }
 
 model ProductVariant {
-  id         Int      @id @default(autoincrement())
+  id         Int         @id @default(autoincrement())
   name       String
-  sku        String   @unique
-  price      Decimal  @db.Decimal(10, 2)
-  stockCount Int      @default(0) @map("stock_count")
-  isActive   Boolean  @default(true) @map("is_active")
+  sku        String      @unique
+  price      Decimal     @db.Decimal(10, 2)
+  stockCount Int         @default(0) @map("stock_count")
+  isActive   Boolean     @default(true) @map("is_active")
   attributes Json?
-  productId  Int      @map("product_id")
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
-
+  productId  Int         @map("product_id")
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
   cartItems  CartItem[]
   orderItems OrderItem[]
 
@@ -126,8 +123,7 @@ model ProductComment {
 }
 
 model UserAddress {
-  id Int @id @default(autoincrement())
-
+  id           Int      @id @default(autoincrement())
   title        String
   fullName     String   @map("full_name")
   phoneNumber  String   @map("phone_number") @db.VarChar(20)
@@ -140,9 +136,7 @@ model UserAddress {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
-
-  // İleride eklenecek ilişkiler:
-  // orders        Order[]
+  orders       Order[]
 
   @@index([userId])
   @@index([isDefault])
@@ -170,6 +164,8 @@ model CartItem {
   variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   createdAt DateTime       @default(now()) @map("created_at")
   updatedAt DateTime       @updatedAt @map("updated_at")
+  Product   Product?       @relation(fields: [productId], references: [id])
+  productId Int?
 
   @@unique([cartId, variantId])
   @@index([cartId])
@@ -177,63 +173,50 @@ model CartItem {
   @@map("cart_items")
 }
 
-// Sipariş durumu
 enum OrderStatus {
-  PENDING // Beklemede 
-  CONFIRMED // Onaylandı 
-  PREPARING // Hazırlanıyor
-  SHIPPED // Kargoya verildi
-  DELIVERED // Teslim edildi
-  CANCELLED // İptal edildi
+  PENDING
+  CONFIRMED
+  PREPARING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 model Order {
-  id Int @id @default(autoincrement())
-
-  // Sipariş bilgileri
-  orderNumber String      @unique @map("order_number")
-  status      OrderStatus @default(PENDING)
-
-  // Fiyat bilgileri (sipariş anındaki fiyatlar)
-  subtotal     Decimal @db.Decimal(10, 2)
-  shippingCost Decimal @default(0) @map("shipping_cost") @db.Decimal(10, 2)
-  taxAmount    Decimal @default(0) @map("tax_amount") @db.Decimal(10, 2)
-  totalAmount  Decimal @map("total_amount") @db.Decimal(10, 2)
-
-  // sipariş anındaki adres bilgisi - değişmemeli
-  shippingAddress Json @map("shipping_address")
-
-  // Ödeme bilgileri
-  paymentMethod String?   @map("payment_method")
-  paymentStatus String?   @default("pending") @map("payment_status")
-  paidAt        DateTime? @map("paid_at")
-
-  // Kargo bilgileri
-  trackingNumber String?   @map("tracking_number")
-  shippedAt      DateTime? @map("shipped_at")
-  deliveredAt    DateTime? @map("delivered_at")
-
-  // İptal/İade
-  cancelledAt  DateTime?   @map("cancelled_at")
-  cancelReason String?     @map("cancel_reason")
-  user         User?       @relation(fields: [userId], references: [id])
-  userId       Int?
-  items        OrderItem[]
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at") @db.Timestamp(6)
+  id              Int          @id @default(autoincrement())
+  orderNumber     String       @unique @map("order_number")
+  status          OrderStatus  @default(PENDING)
+  subtotal        Decimal      @db.Decimal(10, 2)
+  shippingCost    Decimal      @default(0) @map("shipping_cost") @db.Decimal(10, 2)
+  taxAmount       Decimal      @default(0) @map("tax_amount") @db.Decimal(10, 2)
+  totalAmount     Decimal      @map("total_amount") @db.Decimal(10, 2)
+  shippingAddress Json         @map("shipping_address")
+  paymentMethod   String?      @map("payment_method")
+  paymentStatus   String?      @default("pending") @map("payment_status")
+  paidAt          DateTime?    @map("paid_at")
+  trackingNumber  String?      @map("tracking_number")
+  shippedAt       DateTime?    @map("shipped_at")
+  deliveredAt     DateTime?    @map("delivered_at")
+  cancelledAt     DateTime?    @map("cancelled_at")
+  cancelReason    String?      @map("cancel_reason")
+  user            User?        @relation(fields: [userId], references: [id])
+  address         UserAddress? @relation(fields: [addressId], references: [id])
+  addressId       Int?         @map("address_id")
+  userId          Int?
+  items           OrderItem[]
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamp(6)
+  Payment         Payment?
 }
 
 model OrderItem {
-  id Int @id @default(autoincrement())
-
-  // sipariş anındaki bilgiler
+  id              Int            @id @default(autoincrement())
   productName     String         @map("product_name")
   variantName     String         @map("variant_name")
   sku             String
   price           Decimal        @db.Decimal(10, 2)
   quantity        Int
   subtotal        Decimal        @db.Decimal(10, 2)
-  // Ürün detayları (JSON olarak sakla)
   productSnapshot Json           @map("product_snapshot")
   orderId         Int            @map("order_id")
   order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -241,8 +224,37 @@ model OrderItem {
   variant         ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")
+  Product         Product?       @relation(fields: [productId], references: [id])
+  productId       Int?
 
   @@index([orderId])
   @@index([variantId])
   @@map("order_items")
+}
+
+model Payment {
+  id              Int      @id @default(autoincrement())
+  paymentId       String   @unique @map("payment_id")
+  conversationId  String   @map("conversation_id")
+  amount          Decimal  @db.Decimal(10, 2)
+  paidPrice       Decimal  @map("paid_price") @db.Decimal(10, 2)
+  currency        String   @default("TRY")
+  status          String
+  paymentStatus   String?  @map("payment_status")
+  fraudStatus     Int?     @map("fraud_status")
+  cardType        String?  @map("card_type")
+  cardAssociation String?  @map("card_association")
+  cardFamily      String?  @map("card_family")
+  binNumber       String?  @map("bin_number")
+  lastFourDigits  String?  @map("last_four_digits")
+  iyzicoResponse  Json?    @map("iyzico_response")
+  orderId         Int      @unique @map("order_id")
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([paymentId])
+  @@index([conversationId])
+  @@index([status])
+  @@map("payments")
 }
