@@ -126,12 +126,12 @@ export default function HomePage() {
                         {FEATURED_PRODUCTS.map((product, index) => {
                             // Mobile-only image and order mapping
                             const mobileImageMap: { [key: number]: string } = {
-                                1: '/src/img/anasayfa/1.jpg', // WHEY PROTEIN
-                                2: '/src/img/anasayfa/2.jpg', // FITNESS PAKETİ
-                                3: '/src/img/anasayfa/3.jpg', // GÜNLÜK VİTAMİN
-                                4: '/src/img/anasayfa/4.jpg', // PRE-WORKOUT
-                                5: '/src/img/anasayfa/5.jpg', // CREAM OF RICE
-                                6: '/src/img/anasayfa/6.jpg'  // CREATINE
+                                1: '/src/img/anasayfa/whey-protein.jpg', // WHEY PROTEIN
+                                2: '/src/img/anasayfa/fitness-package.jpg', // FITNESS PAKETİ
+                                3: '/src/img/anasayfa/pea-protein.jpg', // GÜNLÜK VİTAMİN
+                                4: '/src/img/anasayfa/micellar-casein.jpg', // PRE-WORKOUT
+                                5: '/src/img/anasayfa/egg-white-powder.jpg', // CREAM OF RICE
+                                6: '/src/img/anasayfa/whey-isolate.jpg'  // CREATINE
                             };
 
                             return (

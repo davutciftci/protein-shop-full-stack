@@ -1,20 +1,64 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { MdOutlineStar } from 'react-icons/md';
 import { PRODUCTS } from '../../data/products';
 import DiscountBadge from '../../components/ui/DiscountBadge';
 
 export default function AllProductsPage() {
+    const [searchParams] = useSearchParams();
+    const category = searchParams.get('kategori');
+    const searchQuery = searchParams.get('search');
+
+    // Filter products based on category parameter and search query
+    const filteredProducts = PRODUCTS.filter(product => {
+        // Kategori filtresi
+        let matchesCategory = true;
+        if (category) {
+            // Handle special cases for category names
+            if (category === 'spor-gidalari') {
+                matchesCategory = product.category === 'spor' || product.category === 'spor-gidalari' || product.category === 'preworkout';
+            } else {
+                matchesCategory = product.category === category;
+            }
+        }
+
+        // Arama filtresi
+        let matchesSearch = true;
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            matchesSearch = product.name.toLowerCase().includes(query) ||
+                product.description.toLowerCase().includes(query);
+        }
+
+        return matchesCategory && matchesSearch;
+    });
+
+    // Get page title based on category or search
+    const getPageTitle = () => {
+        if (searchQuery) {
+            return `ARAMA SONUÇLARI: "${searchQuery}"`;
+        }
+        if (!category) return 'TÜM ÜRÜNLER';
+        const categoryTitles: { [key: string]: string } = {
+            'vitamin': 'VİTAMİN',
+            'gida': 'GIDA',
+            'spor-gidalari': 'SPOR GIDALARI',
+            'saglik': 'SAĞLIK',
+            'protein': 'PROTEİN',
+        };
+        return categoryTitles[category] || 'TÜM ÜRÜNLER';
+    };
+
     return (
         <div className="min-h-screen bg-white">
             <div className="container-custom py-8">
                 {/* Page Title */}
                 <h1 className="text-3xl font-extrabold text-center text-gray-900 mb-8 uppercase tracking-wide">
-                    TÜM ÜRÜNLER
+                    {getPageTitle()}
                 </h1>
 
                 {/* Product Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-                    {PRODUCTS.map((product) => (
+                    {filteredProducts.map((product) => (
                         <Link
                             key={product.id}
                             to={`/urun/${product.slug}`}
@@ -73,7 +117,7 @@ export default function AllProductsPage() {
 
                 {/* Product Count */}
                 <div className="text-center text-gray-900 text-sm font-bold m-24">
-                    Toplam {PRODUCTS.length} ürün görüntüleniyor
+                    Toplam {filteredProducts.length} ürün görüntüleniyor
                 </div>
             </div>
         </div>

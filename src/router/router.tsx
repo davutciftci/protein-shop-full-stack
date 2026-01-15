@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
+import AuthLayout from '../components/layout/AuthLayout';
 
 // Pages
 import HomePage from '../pages/home/HomePage';
@@ -9,6 +10,8 @@ import ProteinPage from '../pages/categories/ProteinPage';
 import ContactPage from '../pages/contact/ContactPage';
 import ReviewsPage from '../pages/reviews/ReviewsPage';
 import FAQPage from '../pages/faq/FAQPage';
+import LoginPage from '../pages/auth/LoginPage';
+import RegisterPage from '../pages/auth/RegisterPage';
 
 export const router = createBrowserRouter([
     {
@@ -42,6 +45,26 @@ export const router = createBrowserRouter([
             {
                 path: 'S.S.S',
                 element: <FAQPage />,
+            }
+        ]
+    },
+    {
+        path: '/giris',
+        element: <AuthLayout />,
+        children: [
+            {
+                index: true,
+                element: <LoginPage />,
+            }
+        ]
+    },
+    {
+        path: '/kayit',
+        element: <AuthLayout />,
+        children: [
+            {
+                index: true,
+                element: <RegisterPage />,
             }
         ]
     },

@@ -4,6 +4,8 @@ import Footer from './Footer';
 import FooterBanner from './FooterBanner';
 import { CartProvider } from '../../context/CartContext';
 import CartSidepanel from '../cart/CartSidepanel';
+import ScrollToTop from '../ScrollToTop';
+import ScrollToTopButton from '../ScrollToTopButton';
 
 export default function Layout() {
     const location = useLocation();
@@ -11,6 +13,8 @@ export default function Layout() {
 
     return (
         <CartProvider>
+            <ScrollToTop />
+            <ScrollToTopButton />
             <div className="min-h-screen flex flex-col">
                 <Navbar />
                 <Outlet />

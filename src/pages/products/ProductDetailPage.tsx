@@ -41,7 +41,6 @@ export default function ProductDetailPage() {
                 setSelectedAroma(0);
                 setSelectedSize(0);
                 setExpandedSection(null);
-                window.scrollTo(0, 0);
             }
         }
     }, [slug]);

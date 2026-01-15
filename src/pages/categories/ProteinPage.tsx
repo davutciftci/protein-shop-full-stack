@@ -4,12 +4,12 @@ import DiscountBadge from '../../components/ui/DiscountBadge';
 
 // Simulated protein products (in real app, filter by category from API)
 const proteinProducts = [
-    { id: 1, name: 'WHEY PROTEIN', description: 'EN ÇOK TERCİH EDİLEN PROTEİN TAKVİYESİ', price: 549, oldPrice: null, discountPercentage: null, rating: 5, reviews: 10869, image: '/src/img/anasayfa/1.jpg', slug: 'whey-protein' },
-    { id: 2, name: 'WHEY ISOLATE', description: '%90 PROTEİN EN SAF WHEY', price: 749, oldPrice: null, discountPercentage: null, rating: 5, reviews: 887, image: '/src/img/anasayfa/2.jpg', slug: 'whey-isolate' },
-    { id: 3, name: 'FITNESS PAKETİ', description: 'EN POPÜLER ÜRÜNLER BİR ARADA', price: 799, oldPrice: 1126, discountPercentage: 29, rating: 5, reviews: 7650, image: '/src/img/anasayfa/3.jpg', slug: 'fitness-paketi' },
-    { id: 4, name: 'PEA PROTEIN', description: 'EN POPÜLER VEGAN PROTEİN KAYNAĞI', price: 349, oldPrice: null, discountPercentage: null, rating: 5, reviews: 1778, image: '/src/img/anasayfa/4.jpg', slug: 'pea-protein' },
-    { id: 5, name: 'MICELLAR CASEIN', description: 'YAVAŞ SİNDİRİLEN PROTEİN KAYNAĞI', price: 599, oldPrice: null, discountPercentage: null, rating: 5, reviews: 768, image: '/src/img/anasayfa/5.jpg', slug: 'micellar-casein' },
-    { id: 6, name: 'EGG WHITE POWDER', description: 'PROTEİNİN ALTIN STANDARTI', price: 899, oldPrice: null, discountPercentage: null, rating: 5, reviews: 539, image: '/src/img/anasayfa/6.jpg', slug: 'egg-white-powder' },
+    { id: 1, name: 'WHEY PROTEIN', description: 'EN ÇOK TERCİH EDİLEN PROTEİN TAKVİYESİ', price: 549, oldPrice: null, discountPercentage: null, rating: 5, reviews: 10869, image: '/src/img/anasayfa/whey-protein.jpg', slug: 'whey-protein' },
+    { id: 2, name: 'WHEY ISOLATE', description: '%90 PROTEİN EN SAF WHEY', price: 749, oldPrice: null, discountPercentage: null, rating: 5, reviews: 887, image: '/src/img/anasayfa/whey-isolate.jpg', slug: 'whey-isolate' },
+    { id: 3, name: 'FITNESS PAKETİ', description: 'EN POPÜLER ÜRÜNLER BİR ARADA', price: 799, oldPrice: 1126, discountPercentage: 29, rating: 5, reviews: 7650, image: '/src/img/anasayfa/fitness-package.jpg', slug: 'fitness-paketi' },
+    { id: 4, name: 'PEA PROTEIN', description: 'EN POPÜLER VEGAN PROTEİN KAYNAĞI', price: 349, oldPrice: null, discountPercentage: null, rating: 5, reviews: 1778, image: '/src/img/anasayfa/pea-protein.jpg', slug: 'pea-protein' },
+    { id: 5, name: 'MICELLAR CASEIN', description: 'YAVAŞ SİNDİRİLEN PROTEİN KAYNAĞI', price: 599, oldPrice: null, discountPercentage: null, rating: 5, reviews: 768, image: '/src/img/anasayfa/micellar-casein.jpg', slug: 'micellar-casein' },
+    { id: 6, name: 'EGG WHITE POWDER', description: 'PROTEİNİN ALTIN STANDARTI', price: 899, oldPrice: null, discountPercentage: null, rating: 5, reviews: 539, image: '/src/img/anasayfa/egg-white-powder.jpg', slug: 'egg-white-powder' },
     { id: 7, name: 'MILK PROTEIN', description: 'TAM PROTEİN KAYNAĞI', price: 699, oldPrice: null, discountPercentage: null, rating: 5, reviews: 205, image: '/src/img/anasayfa/milk-protein.png', slug: 'milk-protein' },
     { id: 8, name: 'SOYA PROTEIN', description: 'VEGAN PROTEİN KAYNAĞI', price: 449, oldPrice: null, discountPercentage: null, rating: 5, reviews: 374, image: '/src/img/anasayfa/soya-protein.png', slug: 'soya-protein' },
     { id: 9, name: 'PROTEIN BAR 2\'Lİ PAKET', description: '%30 PROTEİN, ŞEKER İLAVESİZ', price: 59, oldPrice: 90, discountPercentage: 34, rating: 5, reviews: 180, image: '/src/img/anasayfa/protein-bar-2paket.png', slug: 'protein-bar-2li' },

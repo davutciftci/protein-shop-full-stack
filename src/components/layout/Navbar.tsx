@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react';
 import { CiFaceSmile } from "react-icons/ci";
 import { TfiPackage } from 'react-icons/tfi';
@@ -8,10 +8,25 @@ import { useCart } from '../../context/CartContext';
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const { totalItems, openCart } = useCart();
+    const navigate = useNavigate();
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+    const handleSearch = () => {
+        if (searchQuery.trim()) {
+            navigate(`/urunler?search=${encodeURIComponent(searchQuery.trim())}`);
+            setSearchQuery(''); // Clear search after navigation
+        }
+    };
+
+    const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
     return (
         <nav className="bg-white sticky top-0 z-50 shadow-md">
@@ -48,11 +63,13 @@ export default function Navbar() {
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyPress={handleSearchKeyPress}
                                     placeholder="Aradığınız ürünü yazınız..."
                                     className="px-4 py-2.5 border-gray-300 border-2 rounded-l-md focus:outline-none transition-colors w-[200px] lg:w-[316px]"
                                     style={{ height: '38px' }}
                                 />
                                 <button
+                                    onClick={handleSearch}
                                     className="text-white px-4 lg:px-6 py-2.5 rounded-r-md font-medium transition-colors"
                                     style={{ backgroundColor: '#919191', height: '38px' }}
                                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7a7a7a'}
@@ -65,15 +82,39 @@ export default function Navbar() {
 
                         {/* Right Side - Cart & Account */}
                         <div className="hidden md:flex items-center space-x-3 lg:space-x-4 flex-shrink-0">
-                            {/* Account Button - Tablet/Desktop */}
-                            <button
-                                className="flex items-center justify-center gap-1 border-2 border-gray-400 rounded text-gray-700 transition-colors px-2"
-                                style={{ color: '#919191', height: '38px' }}
+                            {/* Account Button with Dropdown - Tablet/Desktop */}
+                            <div
+                                className="relative"
+                                onMouseEnter={() => setIsAccountDropdownOpen(true)}
+                                onMouseLeave={() => setIsAccountDropdownOpen(false)}
                             >
-                                <User className="w-5 h-5" />
-                                <span className="text-sm font-medium">HESAP</span>
-                                <ChevronDown className="w-4 h-4" />
-                            </button>
+                                <button
+                                    className="flex items-center justify-center gap-1 border-2 border-gray-400 rounded text-gray-700 transition-colors px-2"
+                                    style={{ color: '#919191', height: '38px' }}
+                                >
+                                    <User className="w-5 h-5" />
+                                    <span className="text-sm font-medium">HESAP</span>
+                                    <ChevronDown className="w-4 h-4" />
+                                </button>
+
+                                {/* Dropdown Menu */}
+                                {isAccountDropdownOpen && (
+                                    <div className="absolute right-0 w-[93px] text-center justify-center bg-white border border-gray-200 rounded shadow-lg z-50">
+                                        <Link
+                                            to="/giris"
+                                            className="flex items-center justify-center px-4 py-2 h-[38px] text-sm text-gray-700 hover:bg-gray-100 transition-colors border-b"
+                                        >
+                                            Üye Girişi
+                                        </Link>
+                                        <Link
+                                            to="/kayit"
+                                            className="flex items-center justify-center px-4 py-2 h-[38px] text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                        >
+                                            Üye Ol
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Cart Button - Tablet/Desktop */}
                             {/* Cart Button - Tablet/Desktop */}
@@ -181,6 +222,7 @@ export default function Navbar() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={handleSearchKeyPress}
                     placeholder="ARADIĞINIZ ÜRÜNÜ YAZINIZ."
                     className="text-black w-full pl-12 pr-4 py-3.5 bg-gray-100 rounded-full focus:outline-none"
                 />
