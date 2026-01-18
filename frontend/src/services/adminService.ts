@@ -5,10 +5,29 @@ export interface CreateProductRequest {
     name: string;
     slug: string;
     description?: string;
-    price: string;
+    basePrice?: number;
     stockCount: number;
     categoryId: number;
     isActive?: boolean;
+    features?: string[];
+    nutritionInfo?: string[];
+    usage?: string[];
+    expirationDate?: string;
+    taxRate?: number;
+    servingSize?: string;
+    ingredients?: string;
+    nutritionValues?: any;
+    aminoAcids?: any;
+    variants?: Array<{
+        name: string;
+        sku: string;
+        price: number;
+        stockCount: number;
+        discount?: number;
+        aroma?: string;
+        size?: string;
+        servings?: string;
+    }>;
 }
 
 export interface UpdateProductRequest extends Partial<CreateProductRequest> { }

@@ -16,7 +16,7 @@ interface CartContextType {
     items: CartItem[];
     isOpen: boolean;
     showAlert: boolean;
-    addToCart: (item: Omit<CartItem, 'quantity'>) => void;
+    addToCart: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
     removeFromCart: (id: number) => void;
     updateQuantity: (id: number, quantity: number) => void;
     openCart: () => void;
@@ -42,7 +42,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     }, [items]);
 
-    const addToCart = (newItem: Omit<CartItem, 'quantity'>) => {
+    const addToCart = (newItem: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
         setItems(prevItems => {
             const existingItem = prevItems.find(
                 item => item.id === newItem.id && item.aroma === newItem.aroma && item.size === newItem.size
@@ -51,12 +51,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
             if (existingItem) {
                 return prevItems.map(item =>
                     item.id === newItem.id && item.aroma === newItem.aroma && item.size === newItem.size
-                        ? { ...item, quantity: item.quantity + 1 }
+                        ? { ...item, quantity: item.quantity + quantity }
                         : item
                 );
             }
 
-            return [...prevItems, { ...newItem, quantity: 1 }];
+            return [...prevItems, { ...newItem, quantity }];
         });
         setIsOpen(true);
         setShowAlert(true);

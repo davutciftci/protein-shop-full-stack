@@ -10,15 +10,17 @@ export interface Category {
 
 export interface ProductVariant {
     id: number;
+    productId: number;
     name: string;
     sku: string;
-    price: string;
+    price: number;
     stockCount: number;
-    isActive: boolean;
-    attributes?: Record<string, string>;
-    productId: number;
-    createdAt?: string;
-    updatedAt?: string;
+    discount?: number;
+    aroma?: string;
+    size?: string;
+    servings?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface ProductPhoto {
@@ -51,27 +53,37 @@ export interface Product {
     name: string;
     slug: string;
     description?: string;
-    price: string;
+    price: number;
+    basePrice?: number;
+    taxRate?: number;
     stockCount: number;
     isActive: boolean;
     categoryId: number;
-    category?: Category;
+    category?: {
+        id: number;
+        name: string;
+        slug: string;
+    };
+    features?: string[];
+    nutritionInfo?: string[];
+    usage?: string[];
+    expirationDate?: string;
+    servingSize?: string;
+    ingredients?: string;
+    nutritionValues?: any;
+    aminoAcids?: any;
+    createdAt: string;
+    updatedAt: string;
     variants?: ProductVariant[];
     photos?: ProductPhoto[];
     comments?: ProductComment[];
-    createdAt?: string;
-    updatedAt?: string;
 
-    // Frontend-specific fields
+    // Frontend-specific fields (some moved to main Product interface)
     image?: string; // Primary image URL
     images?: string[]; // All image URLs
     aromas?: Array<{ id: number; name: string; color: string }>; // For flavor options
     sizes?: Array<{ id: number; weight: string; servings?: number; price: number; discount?: number }>; // For size/variant options
-    features?: string[]; // Product features list
-    nutritionInfo?: string[]; // Nutrition information list
-    usage?: string[]; // Usage instructions list
     pricePerServing?: string; // Price per serving
-    expirationDate?: string; // Expiration date
     reviews?: number; // Number of reviews
     rating?: number; // Average rating
     tags?: string[]; // Product tags

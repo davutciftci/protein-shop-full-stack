@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
-import { PRODUCTS } from '../../data/products';
+import { productService } from '../../services/productService';
+import type { Product } from '../../types';
 
 const PRODUCT_CATEGORIES = [
     { name: 'Protein Tozları', icon: '💪', link: '/urunler?kategori=protein' },
@@ -11,8 +12,6 @@ const PRODUCT_CATEGORIES = [
     { name: 'Sağlıklı Atıştırmalıklar', icon: '🍪', link: '/urunler?kategori=atistirmalik' },
     { name: 'Kilo Kontrolü', icon: '⚖️', link: '/urunler?kategori=kilo' },
 ];
-
-const FEATURED_PRODUCTS = PRODUCTS;
 
 const CATEGORY_CARDS = [
     {
@@ -61,6 +60,8 @@ const CATEGORY_CARDS = [
 
 export default function HomePage() {
     const [isMobile, setIsMobile] = useState(false);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -69,9 +70,25 @@ export default function HomePage() {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                setIsLoading(true);
+                const data = await productService.getProducts();
+                setProducts(data.slice(0, 12)); // İlk 12 ürünü göster
+            } catch (error) {
+                console.error('Ürünler yüklenemedi:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
     return (
         <div className="bg-white">
-            {}
+            { }
             <section className="relative">
                 <div className="w-full">
                     <img
@@ -83,7 +100,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {}
+            { }
             <section className="py-4 px-4 overflow-hidden">
                 <div className="container-custom">
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
@@ -117,74 +134,87 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {}
+            {/* Çok Satanlar */}
             <section className="py-8 px-4">
                 <div className="container-custom">
                     <h2 className="text-xl font-bold text-center mb-8 tracking-wider">ÇOK SATANLAR</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                        {FEATURED_PRODUCTS.map((product, index) => {
-                            const mobileImageMap: { [key: number]: string } = {
-                                1: '/src/img/anasayfa/whey-protein.jpg',
-                                2: '/src/img/anasayfa/fitness-package.jpg',
-                                3: '/src/img/anasayfa/pea-protein.jpg',
-                                4: '/src/img/anasayfa/micellar-casein.jpg',
-                                5: '/src/img/anasayfa/egg-white-powder.jpg',
-                                6: '/src/img/anasayfa/whey-isolate.jpg'
-                            };
 
-                            return (
-                                <Link
-                                    to={`/urun/${product.slug}`}
-                                    key={product.id}
-                                    className="group flex flex-col"
-                                    style={{ order: index }}
-                                >
-                                    <div className="relative aspect-square rounded-sm mb-4 overflow-hidden">
-                                        <img
-                                            src={isMobile ? mobileImageMap[product.id] : product.image}
-                                            alt={product.name}
-                                            className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                                        />
-                                        {product.discountPercentage && (
-                                            <div className="absolute top-0 right-0 bg-[#FF2D2D] text-white p-2 text-center leading-none">
-                                                <div className="text-[10px] font-bold">%{product.discountPercentage}</div>
-                                                <div className="text-[8px] font-medium">İNDİRİM</div>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="text-center flex flex-col items-center">
-                                        <h3 className="text-sm font-bold text-gray-900 mb-1 leading-tight uppercase h-10 flex items-center justify-center">
-                                            {product.name}
-                                        </h3>
-                                        <p className="text-[10px] text-gray-500 mb-2 leading-tight uppercase h-8 flex items-center justify-center">
-                                            {product.description}
-                                        </p>
-                                        <div className="flex items-center gap-0.5 mb-1">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star
-                                                    key={i}
-                                                    className={`w-5 h-5 ${i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                                />
-                                            ))}
-                                        </div>
-                                        <span className="text-[10px] text-gray-500 mb-2">
-                                            {product.reviews.toLocaleString('tr-TR')} Yorum
-                                        </span>
-                                        <div className="flex flex-row items-baseline gap-2 justify-center">
-                                            <span className="text-lg font-bold text-gray-900">
-                                                {product.price} TL
-                                            </span>
-                                            {product.oldPrice && (
-                                                <span className="text-xs text-[#FF2D2D] line-through font-bold">
-                                                    {product.oldPrice} TL
-                                                </span>
+                    {isLoading ? (
+                        <div className="text-center py-12">
+                            <p className="text-gray-500">Ürünler yükleniyor...</p>
+                        </div>
+                    ) : products.length === 0 ? (
+                        <div className="text-center py-12">
+                            <p className="text-gray-500">Henüz ürün eklenmemiş</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                            {products.map((product, index) => {
+                                // İlk fotoğrafı al veya placeholder kullan
+                                const productImage = product.photos && product.photos.length > 0
+                                    ? product.photos[0].url
+                                    : '/images/placeholder-product.jpg';
+
+                                // İndirim hesapla
+                                const hasDiscount = product.variants && product.variants.some(v => v.discount && v.discount > 0);
+                                const maxDiscount = hasDiscount && product.variants
+                                    ? Math.max(...product.variants.map(v => v.discount || 0))
+                                    : 0;
+
+                                // Fiyat hesapla (ilk varyantın fiyatı veya basePrice)
+                                const displayPrice = product.variants && product.variants.length > 0
+                                    ? product.variants[0].price
+                                    : product.basePrice || 0;
+
+                                return (
+                                    <Link
+                                        to={`/urun/${product.slug}`}
+                                        key={product.id}
+                                        className="group flex flex-col"
+                                        style={{ order: index }}
+                                    >
+                                        <div className="relative aspect-square rounded-sm mb-4 overflow-hidden bg-gray-100">
+                                            <img
+                                                src={productImage}
+                                                alt={product.name}
+                                                className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                                            />
+                                            {maxDiscount > 0 && (
+                                                <div className="absolute top-0 right-0 bg-[#FF2D2D] text-white p-2 text-center leading-none">
+                                                    <div className="text-[10px] font-bold">%{maxDiscount}</div>
+                                                    <div className="text-[8px] font-medium">İNDİRİM</div>
+                                                </div>
                                             )}
                                         </div>
-                                    </div>
-                                </Link>
-                            );
-                        })}
-                    </div>
+                                        <div className="text-center flex flex-col items-center">
+                                            <h3 className="text-sm font-bold text-gray-900 mb-1 leading-tight uppercase h-10 flex items-center justify-center">
+                                                {product.name}
+                                            </h3>
+                                            <p className="text-[10px] text-gray-500 mb-2 leading-tight uppercase h-8 flex items-center justify-center">
+                                                {product.description || 'Ürün açıklaması'}
+                                            </p>
+                                            <div className="flex items-center gap-0.5 mb-1">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Star
+                                                        key={i}
+                                                        className={`w-5 h-5 ${i < 5 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                                    />
+                                                ))}
+                                            </div>
+                                            <span className="text-[10px] text-gray-500 mb-2">
+                                                {product.comments?.length || 0} Yorum
+                                            </span>
+                                            <div className="flex flex-row items-baseline gap-2 justify-center">
+                                                <span className="text-lg font-bold text-gray-900">
+                                                    {Number(displayPrice).toFixed(0)} TL
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </section>
 

@@ -2,8 +2,8 @@
 import { useParams, Link } from 'react-router-dom';
 import { ChevronDown, Truck, ShoppingCart } from 'lucide-react';
 import { MdOutlineStar } from 'react-icons/md';
-import { PRODUCTS } from '../../data/products';
 import { productService } from '../../services/productService';
+import { getAromaColor } from '../../constants/productOptions';
 import type { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { BsArrowClockwise } from 'react-icons/bs';
@@ -22,15 +22,36 @@ export default function ProductDetailPage() {
     const handleAddToCart = () => {
         if (!product) return;
 
+        // Get the variant matching selected aroma and size
+        const selectedAromaName = product.aromas?.[selectedAroma]?.name;
+        const selectedSizeWeight = product.sizes?.[selectedSize]?.weight;
+
+        let variant = product.variants?.find(
+            (v: any) => v.aroma === selectedAromaName && v.size === selectedSizeWeight
+        );
+        if (!variant) {
+            variant = product.variants?.find((v: any) => v.size === selectedSizeWeight);
+        }
+        if (!variant) {
+            variant = product.variants?.find((v: any) => v.aroma === selectedAromaName);
+        }
+        if (!variant && product.variants?.length) {
+            variant = product.variants[0];
+        }
+
+        const originalPrice = variant?.price || product.basePrice || 0;
+        const discount = variant?.discount || 0;
+        const finalPrice = discount > 0 ? Math.round(originalPrice * (1 - discount / 100)) : originalPrice;
+
         addToCart({
             id: product.id,
             name: product.name,
             description: product.description || '',
-            price: parseFloat(product.price) || 0,
+            price: typeof finalPrice === 'string' ? parseFloat(finalPrice) : finalPrice,
             image: product.image || '',
-            aroma: product.aromas?.[selectedAroma]?.name,
-            size: product.sizes?.[selectedSize]?.weight,
-        });
+            aroma: selectedAromaName,
+            size: selectedSizeWeight,
+        }, quantity);
     };
 
     useEffect(() => {
@@ -45,20 +66,29 @@ export default function ProductDetailPage() {
                     ...productData,
                     image: productData.photos?.[0]?.url ? `${BACKEND_BASE_URL}${productData.photos[0].url}` : '/default-product.jpg',
                     images: productData.photos?.map(p => `${BACKEND_BASE_URL}${p.url}`) || [],
-                    pricePerServing: productData.price?.toString() || '0',
-                    expirationDate: '12/2025',
-                    sizes: productData.variants?.map((v) => ({
-                        id: v.id,
-                        weight: v.attributes?.size || v.name,
-                        servings: v.attributes?.servings,
-                        price: v.price,
-                        discount: v.attributes?.discount
-                    })) || [],
-                    aromas: productData.variants?.map((v) => ({
-                        id: v.id,
-                        name: v.attributes?.aroma || 'Default',
-                        color: '#000'
-                    })) || [],
+                    expirationDate: productData.expirationDate
+                        ? new Date(productData.expirationDate).toLocaleDateString('tr-TR', { month: '2-digit', year: 'numeric' })
+                        : undefined,
+                    // Extract unique sizes with their info
+                    sizes: productData.variants
+                        ?.filter((v, i, arr) => arr.findIndex(x => x.size === v.size) === i)
+                        .map((v) => ({
+                            id: v.id,
+                            weight: v.size || v.name,
+                            price: v.price,
+                            discount: v.discount
+                        })) || [],
+                    // Extract unique aromas
+                    aromas: productData.variants
+                        ?.filter((v, i, arr) => arr.findIndex(x => x.aroma === v.aroma) === i)
+                        .map((v) => ({
+                            id: v.id,
+                            name: v.aroma || v.name,
+                            color: '#000'
+                        })) || [],
+                    nutritionInfo: productData.nutritionValues?.values?.map((nv: { name: string; value: string; unit: string }) =>
+                        `${nv.name}: ${nv.value} ${nv.unit}`
+                    ) || productData.nutritionInfo || [],
                     reviews: 0,
                     rating: 5,
                 };
@@ -94,6 +124,69 @@ export default function ProductDetailPage() {
     const toggleSection = (section: ExpandedSection) => {
         setExpandedSection(prev => prev === section ? null : section);
     };
+
+    // Find the variant that matches selected aroma and size
+    const getSelectedVariant = () => {
+        if (!product.variants || product.variants.length === 0) return null;
+
+        const selectedAromaName = product.aromas?.[selectedAroma]?.name;
+        const selectedSizeWeight = product.sizes?.[selectedSize]?.weight;
+
+        // Try to find exact match for aroma + size
+        let variant = product.variants.find(
+            (v: any) => v.aroma === selectedAromaName && v.size === selectedSizeWeight
+        );
+
+        // If no exact match, try to find by size only
+        if (!variant) {
+            variant = product.variants.find((v: any) => v.size === selectedSizeWeight);
+        }
+
+        // If still no match, try by aroma only
+        if (!variant) {
+            variant = product.variants.find((v: any) => v.aroma === selectedAromaName);
+        }
+
+        // Fallback to first variant
+        return variant || product.variants[0];
+    };
+
+    // Get the price for the currently selected variant
+    const getVariantPrice = () => {
+        const variant = getSelectedVariant();
+        return variant?.price || product.basePrice || 0;
+    };
+
+    // Get the serving info for the currently selected variant
+    const getVariantServings = () => {
+        const variant = getSelectedVariant();
+        return variant?.servings || '';
+    };
+
+    // Get the discount percentage for the currently selected variant
+    const getVariantDiscount = () => {
+        const variant = getSelectedVariant();
+        return variant?.discount && variant.discount > 0 ? variant.discount : 0;
+    };
+
+    // Get original price (what's stored in DB - base price)
+    const getOriginalPrice = () => {
+        const variant = getSelectedVariant();
+        return variant?.price || product.basePrice || 0;
+    };
+
+    // Calculate discounted price (if discount exists)
+    const getDiscountedPrice = () => {
+        const originalPrice = getOriginalPrice();
+        const discount = getVariantDiscount();
+        if (discount > 0) {
+            return Math.round(originalPrice * (1 - discount / 100));
+        }
+        return originalPrice;
+    };
+
+    // Check if there's an active discount
+    const hasDiscount = () => getVariantDiscount() > 0;
 
     const ExpandableSections = () => (
         <div className="border-t border-gray-200">
@@ -131,13 +224,22 @@ export default function ProductDetailPage() {
                 </button>
                 {expandedSection === 'nutrition' && (
                     <div className="pb-4">
-                        <ul className="space-y-2">
+                        {/* Nutrition Values */}
+                        <ul className="space-y-2 mb-4">
                             {product.nutritionInfo?.map((info, index) => (
                                 <li key={index} className="text-sm text-gray-600">
                                     {info}
                                 </li>
                             )) || <li className="text-sm text-gray-600">Bilgi mevcut değil</li>}
                         </ul>
+
+                        {/* Ingredients */}
+                        {product.ingredients && (
+                            <div className="border-t border-gray-200 pt-4 mt-4">
+                                <h4 className="font-semibold text-gray-900 mb-2">İçindekiler:</h4>
+                                <p className="text-sm text-gray-600">{product.ingredients}</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -223,7 +325,7 @@ export default function ProductDetailPage() {
             </div>
 
             { }
-            <span className="text-2xl font-bold text-gray-900">{product.price} TL</span>
+            <span className="text-2xl font-bold text-gray-900">{getDiscountedPrice()} TL</span>
         </div>
     );
 
@@ -290,7 +392,7 @@ export default function ProductDetailPage() {
                             <span className="text-sm text-gray-700">{aroma.name}</span>
                             <div
                                 className="w-5 h-5 rounded-sm border border-gray-300 ml-auto"
-                                style={{ backgroundColor: aroma.color }}
+                                style={{ backgroundColor: getAromaColor(aroma.name) }}
                             />
                         </button>
                     ))}
@@ -313,7 +415,7 @@ export default function ProductDetailPage() {
                                 : 'border-gray-200 hover:border-gray-300'
                                 }`}
                         >
-                            {size.discount && (
+                            {size.discount && size.discount > 0 && (
                                 <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-[#ef0000] text-white text-[10px] font-bold px-2 pb-0.5 rounded whitespace-nowrap mb-2">
                                     %{size.discount} İNDİRİM
                                 </span>
@@ -326,7 +428,6 @@ export default function ProductDetailPage() {
                                 </div>
                             )}
                             <div className="text-sm font-bold text-gray-900">{size.weight}</div>
-                            <div className="text-xs font-bold text-gray-500">{size.servings}</div>
                         </button>
                     ))}
                 </div>
@@ -337,7 +438,7 @@ export default function ProductDetailPage() {
     const AddToCartButton = ({ showPrice = false }: { showPrice?: boolean }) => (
         <div className="flex items-center gap-4">
             {showPrice && (
-                <span className="text-sm font-bold text-gray-500">{product.pricePerServing} TL /Servis</span>
+                <span className="text-sm font-bold text-gray-500">{getVariantServings()} TL /Servis</span>
             )}
             <button
                 onClick={handleAddToCart}
@@ -375,8 +476,13 @@ export default function ProductDetailPage() {
 
                     { }
                     <div className="flex items-baseline justify-between mb-4">
-                        <span className="text-3xl font-bold text-gray-900">{product.price} TL</span>
-                        <span className="text-sm font-bold text-gray-500">{product.pricePerServing} TL /Servis</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-3xl font-bold text-gray-900">{getDiscountedPrice()} TL</span>
+                            {hasDiscount() && (
+                                <span className="text-lg text-red-500 line-through">{getOriginalPrice()} TL</span>
+                            )}
+                        </div>
+                        <span className="text-sm font-bold text-gray-500">{getVariantServings()} TL /Servis</span>
                     </div>
 
                     { }
@@ -469,13 +575,13 @@ export default function ProductDetailPage() {
                                     +
                                 </button>
                             </div>
-                            <span className="text-2xl font-bold text-gray-900">{product.price} TL</span>
+                            <span className="text-2xl font-bold text-gray-900">{getDiscountedPrice()} TL</span>
                         </div>
 
                         { }
                         <div className="flex flex-col">
                             <div className="flex justify-end mb-2">
-                                <span className="text-sm font-bold text-gray-500">{product.pricePerServing} TL /Servis</span>
+                                <span className="text-sm font-bold text-gray-500">{getVariantServings()} TL /Servis</span>
                             </div>
                             <button onClick={handleAddToCart} className="w-full flex items-center justify-center gap-3 bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 rounded transition-colors">
                                 <ShoppingCart className="w-5 h-5" />
@@ -514,8 +620,13 @@ export default function ProductDetailPage() {
 
                             { }
                             <div className="flex items-baseline justify-between mb-4">
-                                <span className="text-3xl font-bold text-gray-900">{product.price} TL</span>
-                                <span className="text-sm font-bold text-gray-500">{product.pricePerServing} TL /Servis</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-3xl font-bold text-gray-900">{getDiscountedPrice()} TL</span>
+                                    {hasDiscount() && (
+                                        <span className="text-lg text-red-500 line-through">{getOriginalPrice()} TL</span>
+                                    )}
+                                </div>
+                                <span className="text-sm font-bold text-gray-500">{getVariantServings()} TL /Servis</span>
                             </div>
 
                             { }
@@ -560,69 +671,6 @@ export default function ProductDetailPage() {
                 </div>
             </div>
 
-            { }
-            <div className="container-custom py-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-8 text-center uppercase tracking-wide">
-                    Son Görüntülenen Ürünler
-                </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6 pr-2">
-                    {PRODUCTS.map((item) => (
-                        <Link
-                            key={item.id}
-                            to={`/urun/${item.slug}`}
-                            className="group flex flex-col"
-                        >
-                            { }
-                            <div className="relative aspect-square mb-1">
-                                <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-                                />
-                                {item.discountPercentage && (
-                                    <div className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#ef0000] text-white px-1.5 py-1 text-[10px] font-bold text-center leading-tight">
-                                        <span className="block">%{item.discountPercentage}</span>
-                                        <span className="block">İNDİRİM</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            { }
-                            <h3 className="text-xs sm:text-sm font-bold text-gray-900 text-center min-h-[1.75rem] flex items-center justify-center">
-                                {item.name}
-                            </h3>
-
-                            { }
-                            <p className="text-[10px] sm:text-xs text-gray-500 text-center min-h-[1.5rem] flex items-center justify-center leading-tight">
-                                {item.description}
-                            </p>
-
-                            { }
-                            <div className="flex items-center justify-center gap-0.5 mb-1">
-                                {[...Array(5)].map((_, i) => (
-                                    <MdOutlineStar
-                                        key={i}
-                                        className={`w-3 h-3 ${i < Math.floor(item.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
-                                    />
-                                ))}
-                            </div>
-
-                            { }
-                            <p className="text-[10px] sm:text-xs text-gray-500 text-center mb-2">
-                                {item.reviews.toLocaleString('tr-TR')} Yorum
-                            </p>
-
-                            { }
-                            <div className="flex items-center justify-center gap-2 flex-wrap">
-                                <span className="text-sm font-bold text-gray-900">{item.price} TL</span>
-                                {item.oldPrice && (
-                                    <span className="text-xs text-red-500 line-through">{item.oldPrice} TL</span>
-                                )}
-                            </div>
-                        </Link>
-                    ))}
-                </div>
-            </div>
 
             { }
             <div className="container-custom py-8">
@@ -647,69 +695,50 @@ export default function ProductDetailPage() {
 
                     { }
                     <div className="flex-1 space-y-2">
-                        {[
-                            { stars: 5, percent: 85, count: 9238 },
-                            { stars: 4, percent: 10, count: 1087 },
-                            { stars: 3, percent: 3, count: 326 },
-                            { stars: 2, percent: 1, count: 109 },
-                            { stars: 1, percent: 1, count: 109 },
-                        ].map((rating) => (
-                            <div key={rating.stars} className="flex items-center gap-3">
-                                <div className="flex items-center gap-0.5 w-20">
-                                    {[...Array(rating.stars)].map((_, i) => (
-                                        <MdOutlineStar key={i} className="w-3 h-3 text-yellow-400" />
-                                    ))}
-                                </div>
-                                <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-[#2126AB] rounded-full"
-                                        style={{ width: `${rating.percent}%` }}
-                                    />
-                                </div>
-                                <span className="text-xs text-gray-600 w-12 text-right">{rating.count}</span>
-                            </div>
-                        ))}
+                        {(() => {
+                            const reviews = product.productReviews || [];
+                            const totalReviews = reviews.length;
+                            const ratingCounts = [0, 0, 0, 0, 0];
+                            reviews.forEach((r: any) => {
+                                if (r.rating >= 1 && r.rating <= 5) {
+                                    ratingCounts[r.rating - 1]++;
+                                }
+                            });
+                            return [5, 4, 3, 2, 1].map((stars) => {
+                                const count = ratingCounts[stars - 1];
+                                const percent = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0;
+                                return (
+                                    <div key={stars} className="flex items-center gap-3">
+                                        <div className="flex items-center gap-0.5 w-20">
+                                            {[...Array(stars)].map((_, i) => (
+                                                <MdOutlineStar key={i} className="w-3 h-3 text-yellow-400" />
+                                            ))}
+                                        </div>
+                                        <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-[#2126AB] rounded-full"
+                                                style={{ width: `${percent}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-xs text-gray-600 w-12 text-right">{count}</span>
+                                    </div>
+                                );
+                            });
+                        })()}
                     </div>
                 </div>
 
                 { }
                 <div className="space-y-4 mb-8">
-                    {[
-                        { name: 'EREN U.', title: 'Her zamanki kalite. Teşekkürler', text: 'Her zamanki kalite. Teşekkürler', date: '08/09/24', rating: 5 },
-                        { name: 'Bahadır K.', title: 'En iyi aroma', text: 'En iyi aroma', date: '08/05/24', rating: 5 },
-                        { name: 'Burhan K.', title: 'Yıllardır en beğendiğim protein tozu', text: 'Yıllardır en beğendiğim protein tozu protein içer de olsak önce olacak', date: '08/05/24', rating: 5 },
-                        { name: 'Berke Ç.', title: 'Beğendim', text: 'Beğendim', date: '08/05/24', rating: 5 },
-                        { name: 'Deniz C.', title: 'Çok iyi tat', text: 'Çok iyi tat', date: '05/03/24', rating: 5 },
-                        { name: 'Burak B.', title: 'Tadı harika, kesinlikle tavsiye ederim', text: 'Tadı harika, kesinlikle tavsiye ederim', date: '08/03/24', rating: 5 },
-                        { name: 'Fatih K.', title: 'Fatih kaya', text: 'Günaydınlar, ve teşekkürler. Göndermeniz için sipariş aldısanız ve gelmiştir. Her zaman mükemmel işlerim var size', date: '08/09/24', rating: 5 },
-                        { name: 'Berk Y.', title: 'Gayet beğendim ve sürekli olarak', text: 'Gayet beğendim ve sürekli olarak kullanıyorum', date: '08/09/24', rating: 5 },
-                        { name: 'Eser S.', title: 'çok iyi üründen memnun oldum', text: 'çok iyi üründen memnun oldum', date: '08/09/24', rating: 5 },
-                        { name: 'Egemen B.', title: 'Harika', text: 'Ben gayet iyi buldum, devamını diliyorum.', date: '04/05/24', rating: 5 },
-                    ].map((review, index) => (
-                        <div
-                            key={index}
-                            className={`bg-[#F7F7F7] px-6 py-8 rounded-[30px] ${index >= 3 ? 'hidden md:block' : ''}`}
-                        >
-                            { }
-                            <div className="md:hidden">
-                                <div className="flex items-center gap-0.5 mb-2">
-                                    {[...Array(5)].map((_, i) => (
-                                        <MdOutlineStar
-                                            key={i}
-                                            className={`w-5 h-5 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                                        />
-                                    ))}
-                                </div>
-                                <div className="mb-2">
-                                    <span className="font-bold text-gray-900 text-sm block">{review.name}</span>
-                                    <span className="font-bold text-gray-900 text-sm">{review.date}</span>
-                                </div>
-                            </div>
-
-                            { }
-                            <div className="hidden md:flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex items-center gap-0.5">
+                    {(product.productReviews && product.productReviews.length > 0) ? (
+                        product.productReviews.map((review: any, index: number) => (
+                            <div
+                                key={index}
+                                className={`bg-[#F7F7F7] px-6 py-8 rounded-[30px] ${index >= 3 ? 'hidden md:block' : ''}`}
+                            >
+                                { }
+                                <div className="md:hidden">
+                                    <div className="flex items-center gap-0.5 mb-2">
                                         {[...Array(5)].map((_, i) => (
                                             <MdOutlineStar
                                                 key={i}
@@ -717,15 +746,37 @@ export default function ProductDetailPage() {
                                             />
                                         ))}
                                     </div>
-                                    <span className="text-sm font-bold text-gray-900">{review.name}</span>
+                                    <div className="mb-2">
+                                        <span className="font-bold text-gray-900 text-sm block">{review.userName}</span>
+                                        <span className="font-bold text-gray-900 text-sm">{new Date(review.createdAt).toLocaleDateString('tr-TR')}</span>
+                                    </div>
                                 </div>
-                                <span className="text-gray-900 text-sm font-bold">{review.date}</span>
-                            </div>
 
-                            <h4 className="font-bold text-gray-900 mb-1">{review.title}</h4>
-                            <p className="text-sm text-gray-600">{review.text}</p>
+                                { }
+                                <div className="hidden md:flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-0.5">
+                                            {[...Array(5)].map((_, i) => (
+                                                <MdOutlineStar
+                                                    key={i}
+                                                    className={`w-5 h-5 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <span className="text-sm font-bold text-gray-900">{review.userName}</span>
+                                    </div>
+                                    <span className="text-gray-900 text-sm font-bold">{new Date(review.createdAt).toLocaleDateString('tr-TR')}</span>
+                                </div>
+
+                                <h4 className="font-bold text-gray-900 mb-1">{review.title}</h4>
+                                <p className="text-sm text-gray-600">{review.comment}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="bg-[#F7F7F7] px-6 py-8 rounded-[30px] text-center">
+                            <p className="text-gray-600">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
                         </div>
-                    ))}
+                    )}
                 </div>
 
                 { }
@@ -755,9 +806,7 @@ export default function ProductDetailPage() {
                     </div>
                     <span className="text-gray-400">&gt;</span>
                 </div>
-
-                { }
-                <h2 className="text-xl font-bold text-gray-900 mb-6 text-center uppercase tracking-wide">
+                {/*  <h2 className="text-xl font-bold text-gray-900 mb-6 text-center uppercase tracking-wide">
                     ÇOK SATANLAR
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6 pr-2 mb-6">
@@ -816,7 +865,7 @@ export default function ProductDetailPage() {
                     >
                         TÜMÜNÜ GÖR
                     </Link>
-                </div>
+                </div> */}
 
                 <div className="flex items-center gap-2 mt-8 text-sm">
                     <Link to="/" className="text-gray-600 hover:text-gray-900">OJS Nutrition</Link>
