@@ -9,163 +9,114 @@ import {
 } from '../services/order';
 import { OrderStatus } from '../../generated/prisma';
 import { AuthenticatedRequest } from '../middlewares/auth';
+import { asyncHandler } from '../utils/asyncHandler';
 
-export const getMyOrders = async (
+export const getMyOrders = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const userId = req.user?.userId!;
-        console.log('[OrderController] getMyOrders - User ID:', userId);
+    const userId = req.user?.userId!;
 
-        const orders = await getOrdersByUserId(userId);
+    const orders = await getOrdersByUserId(userId);
 
-        console.log('[OrderController] getMyOrders - Success, returned:', orders.length, 'orders');
-
-        res.status(200).json({
-            status: 'success',
-            results: orders.length,
-            data: orders,
-        });
-    } catch (error) {
-        console.log('[OrderController] getMyOrders - Error:', error);
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        results: orders.length,
+        data: orders,
+    });
+});
 
 
-export const getOrders = async (
+export const getOrders = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        console.log('[OrderController] getOrders - Admin request');
+    const orders = await getAllOrders();
 
-        const orders = await getAllOrders();
-
-        console.log('[OrderController] getOrders - Success, returned:', orders.length, 'orders');
-
-        res.status(200).json({
-            status: 'success',
-            results: orders.length,
-            data: orders,
-        });
-    } catch (error) {
-        console.log('[OrderController] getOrders - Error:', error);
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        results: orders.length,
+        data: orders,
+    });
+});
 
 
-export const getOrder = async (
+export const getOrder = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const id = parseInt(req.params.id);
-        const userId = req.user?.userId!;
-        const isAdmin = req.user?.role === 'ADMIN';
-        console.log('[OrderController] getOrder - ID:', id, 'User ID:', userId, 'Is Admin:', isAdmin);
+    const id = parseInt(req.params.id);
+    const userId = req.user?.userId!;
+    const isAdmin = req.user?.role === 'ADMIN';
 
-        const order = await getOrderById(id);
+    const order = await getOrderById(id);
 
-
-        if (!isAdmin && order.userId !== userId) {
-            console.log('[OrderController] getOrder - Unauthorized access attempt');
-            return res.status(403).json({
-                status: 'error',
-                message: 'Bu siparişe erişim yetkiniz yok',
-            });
-        }
-
-        console.log('[OrderController] getOrder - Success');
-
-        res.status(200).json({
-            status: 'success',
-            data: order,
+    if (!isAdmin && order.userId !== userId) {
+        return res.status(403).json({
+            status: 'error',
+            message: 'Bu siparişe erişim yetkiniz yok',
         });
-    } catch (error) {
-        console.log('[OrderController] getOrder - Error:', error);
-        next(error);
     }
-};
 
-export const createNewOrder = async (
+    res.status(200).json({
+        status: 'success',
+        data: order,
+    });
+});
+
+export const createNewOrder = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const userId = req.user?.userId!;
-        const { shippingAddressId, paymentMethod } = req.body;
-        console.log('[OrderController] createNewOrder - User ID:', userId, 'Body:', req.body);
+    const userId = req.user?.userId!;
+    const { shippingAddressId, paymentMethod } = req.body;
 
-        const order = await createOrder(userId, shippingAddressId, paymentMethod || 'MANUAL');
-        console.log('[OrderController] createNewOrder - Success, order ID:', order.id);
+    const order = await createOrder(userId, shippingAddressId, paymentMethod || 'MANUAL');
 
-        res.status(201).json({
-            status: 'success',
-            message: 'Siparişiniz başarıyla oluşturuldu',
-            data: order,
-        });
-    } catch (error) {
-        console.log('[OrderController] createNewOrder - Error:', error);
-        next(error);
-    }
-};
+    res.status(201).json({
+        status: 'success',
+        message: 'Siparişiniz başarıyla oluşturuldu',
+        data: order,
+    });
+});
 
 
-export const updateStatus = async (
+export const updateStatus = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const id = parseInt(req.params.id);
-        const { status, trackingNumber, cancelReason } = req.body;
-        console.log('[OrderController] updateStatus - ID:', id, 'Body:', req.body);
+    const id = parseInt(req.params.id);
+    const { status, trackingNumber, cancelReason } = req.body;
 
-        const order = await updateOrderStatus(id, status as OrderStatus, trackingNumber, cancelReason);
+    const order = await updateOrderStatus(id, status as OrderStatus, trackingNumber, cancelReason);
 
-        console.log('[OrderController] updateStatus - Success');
-
-        res.status(200).json({
-            status: 'success',
-            message: 'Sipariş durumu güncellendi',
-            data: order,
-        });
-    } catch (error) {
-        console.log('[OrderController] updateStatus - Error:', error);
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        message: 'Sipariş durumu güncellendi',
+        data: order,
+    });
+});
 
 
-export const cancelUserOrder = async (
+export const cancelUserOrder = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const id = parseInt(req.params.id);
-        const userId = req.user?.userId!;
-        const { cancelReason } = req.body;
-        console.log('[OrderController] cancelUserOrder - ID:', id, 'User ID:', userId, 'Reason:', cancelReason);
+    const id = parseInt(req.params.id);
+    const userId = req.user?.userId!;
+    const { cancelReason } = req.body;
 
-        const order = await cancelOrder(id, userId, cancelReason);
+    const order = await cancelOrder(id, userId, cancelReason);
 
-        console.log('[OrderController] cancelUserOrder - Success');
-
-        res.status(200).json({
-            status: 'success',
-            message: 'Sipariş iptal edildi',
-            data: order,
-        });
-    } catch (error) {
-        console.log('[OrderController] cancelUserOrder - Error:', error);
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        message: 'Sipariş iptal edildi',
+        data: order,
+    });
+});

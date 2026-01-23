@@ -15,11 +15,6 @@ import { UserRole } from '../../generated/prisma';
 
 const router = Router();
 
-router.use((req, res, next) => {
-    console.log(`[AdminStatsRoutes] ${req.method} ${req.originalUrl}`);
-    next();
-});
-
 router.use(authenticate);
 router.use(requireRole(UserRole.ADMIN));
 

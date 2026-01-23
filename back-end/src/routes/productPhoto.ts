@@ -14,12 +14,8 @@ import { createPhotoSchema, updatePhotoSchema } from '../validators/productPhoto
 import { UserRole } from "../../generated/prisma";
 import { upload } from '../config/multer';
 
-const router = Router();
 
-router.use((req, res, next) => {
-    console.log(`[PhotoRoutes] ${req.method} ${req.originalUrl}`);
-    next();
-});
+const router = Router();
 
 router.get('/product/:productId', getProductPhotos);
 router.get('/:id', getPhoto);

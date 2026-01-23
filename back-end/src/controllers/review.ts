@@ -1,88 +1,73 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../middlewares/auth';
 import * as reviewService from '../services/review';
+import { asyncHandler } from '../utils/asyncHandler';
 
-export const createReviewController = async (
+export const createReviewController = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const userId = req.user?.userId!;
-        const { productId, orderId, orderItemId, rating, comment } = req.body;
+    const userId = req.user?.userId!;
+    const { productId, orderId, orderItemId, rating, comment } = req.body;
 
-        const review = await reviewService.createReview(
-            userId,
-            productId,
-            orderId,
-            orderItemId,
-            rating,
-            comment
-        );
+    const review = await reviewService.createReview(
+        userId,
+        productId,
+        orderId,
+        orderItemId,
+        rating,
+        comment
+    );
 
-        res.status(201).json({
-            status: 'success',
-            message: 'Yorumunuz başarıyla gönderildi. Onaylandıktan sonra yayınlanacaktır.',
-            data: review
-        });
-    } catch (error) {
-        next(error);
-    }
-};
+    res.status(201).json({
+        status: 'success',
+        message: 'Yorumunuz başarıyla gönderildi. Onaylandıktan sonra yayınlanacaktır.',
+        data: review
+    });
+});
 
-export const getProductReviewsController = async (
+export const getProductReviewsController = asyncHandler(async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const productId = parseInt(req.params.productId);
-        const reviews = await reviewService.getProductReviews(productId);
+    const productId = parseInt(req.params.productId);
+    const reviews = await reviewService.getProductReviews(productId);
 
-        res.status(200).json({
-            status: 'success',
-            results: reviews.length,
-            data: reviews
-        });
-    } catch (error) {
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        results: reviews.length,
+        data: reviews
+    });
+});
 
-export const getAllReviewsController = async (
+export const getAllReviewsController = asyncHandler(async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const limit = parseInt(req.query.limit as string) || 10;
-        const reviews = await reviewService.getAllApprovedReviews(limit);
+    const limit = parseInt(req.query.limit as string) || 10;
+    const reviews = await reviewService.getAllApprovedReviews(limit);
 
-        res.status(200).json({
-            status: 'success',
-            results: reviews.length,
-            data: reviews
-        });
-    } catch (error) {
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        results: reviews.length,
+        data: reviews
+    });
+});
 
-export const getMyReviewableOrdersController = async (
+export const getMyReviewableOrdersController = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const userId = req.user?.userId!;
-        const orders = await reviewService.getUserReviewableOrders(userId);
+    const userId = req.user?.userId!;
+    const orders = await reviewService.getUserReviewableOrders(userId);
 
-        res.status(200).json({
-            status: 'success',
-            results: orders.length,
-            data: orders
-        });
-    } catch (error) {
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        results: orders.length,
+        data: orders
+    });
+});

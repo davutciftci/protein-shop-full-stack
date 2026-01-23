@@ -6,123 +6,81 @@ import {
     updateVariant,
     deleteVariant,
 } from '../services/productVariant';
-import { AuthenticatedRequest } from '../middlewares/auth';
+import { asyncHandler } from '../utils/asyncHandler';
 
-export const getProductVariants = async (
+export const getProductVariants = asyncHandler(async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const productId = parseInt(req.params.productId);
-        console.log('[VariantController] getProductVariants - Product ID:', productId);
+    const productId = parseInt(req.params.productId);
 
-        const variants = await getVariantsByProductId(productId);
+    const variants = await getVariantsByProductId(productId);
 
-        console.log('[VariantController] getProductVariants - Success, returned:', variants.length, 'variants');
-
-        res.status(200).json({
-            status: 'success',
-            results: variants.length,
-            data: variants,
-        });
-    } catch (error) {
-        console.log('[VariantController] getProductVariants - Error:', error);
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        results: variants.length,
+        data: variants,
+    });
+});
 
 
-export const getVariant = async (
+export const getVariant = asyncHandler(async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const id = parseInt(req.params.id);
-        console.log('[VariantController] getVariant - ID:', id);
+    const id = parseInt(req.params.id);
 
-        const variant = await getVariantById(id);
+    const variant = await getVariantById(id);
 
-        console.log('[VariantController] getVariant - Success');
-
-        res.status(200).json({
-            status: 'success',
-            data: variant,
-        });
-    } catch (error) {
-        console.log('[VariantController] getVariant - Error:', error);
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        data: variant,
+    });
+});
 
 
-export const createNewVariant = async (
+export const createNewVariant = asyncHandler(async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        console.log('[VariantController] createNewVariant - Body:', req.body);
-        console.log('[VariantController] createNewVariant - User:', (req as AuthenticatedRequest).user);
+    const variant = await createVariant(req.body);
 
-        const variant = await createVariant(req.body);
-
-        console.log('[VariantController] createNewVariant - Success, variant ID:', variant.id);
-
-        res.status(201).json({
-            status: 'success',
-            message: 'Varyant başarıyla oluşturuldu',
-            data: variant,
-        });
-    } catch (error) {
-        console.log('[VariantController] createNewVariant - Error:', error);
-        next(error);
-    }
-};
+    res.status(201).json({
+        status: 'success',
+        message: 'Varyant başarıyla oluşturuldu',
+        data: variant,
+    });
+});
 
 
-export const updateVariantById = async (
+export const updateVariantById = asyncHandler(async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const id = parseInt(req.params.id);
-        console.log('[VariantController] updateVariantById - ID:', id, 'Body:', req.body);
+    const id = parseInt(req.params.id);
 
-        const variant = await updateVariant(id, req.body);
+    const variant = await updateVariant(id, req.body);
 
-        console.log('[VariantController] updateVariantById - Success');
-
-        res.status(200).json({
-            status: 'success',
-            message: 'Varyant başarıyla güncellendi',
-            data: variant,
-        });
-    } catch (error) {
-        console.log('[VariantController] updateVariantById - Error:', error);
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        message: 'Varyant başarıyla güncellendi',
+        data: variant,
+    });
+});
 
 
-export const deleteVariantById = async (
+export const deleteVariantById = asyncHandler(async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const id = parseInt(req.params.id);
-        console.log('[VariantController] deleteVariantById - ID:', id);
+    const id = parseInt(req.params.id);
 
-        await deleteVariant(id);
+    await deleteVariant(id);
 
-        console.log('[VariantController] deleteVariantById - Success');
-
-        res.status(204).send();
-    } catch (error) {
-        console.log('[VariantController] deleteVariantById - Error:', error);
-        next(error);
-    }
-};
+    res.status(204).send();
+});

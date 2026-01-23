@@ -12,7 +12,6 @@ export const getAllShippingMethods = asyncHandler(async (req: Request, res: Resp
         }
     });
 
-    // Encoding hatası düzeltmesi
     const fixedMethods = shippingMethods.map(method => ({
         ...method,
         deliveryDays: method.deliveryDays

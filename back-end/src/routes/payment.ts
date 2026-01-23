@@ -8,12 +8,8 @@ import { authenticate } from '../middlewares/auth';
 import { validate } from '../middlewares/validate';
 import { processPaymentSchema } from '../validators/payment';
 
-const router = Router();
 
-router.use((req, res, next) => {
-    console.log(`[PaymentRoutes] ${req.method} ${req.originalUrl}`);
-    next();
-});
+const router = Router();
 
 router.get('/test-cards', listTestCards);
 

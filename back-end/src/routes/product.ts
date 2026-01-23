@@ -7,15 +7,12 @@ import { validate } from "../middlewares/validate";
 import { createProductSchema, updateProductSchema } from "../validators/product";
 
 
+
 const router = Router();
 
-router.use((req, res, next) => {
-    console.log(`[$ProductRoutes] ${req.method} ${req.originalUrl}`)
-    next()
-})
 router.get('/search', searchProducts);
 router.get('/paginated', getPaginatedProductsList)
-router.get("/slug/:slug", getProductBySlug); // ← Yeni endpoint
+router.get("/slug/:slug", getProductBySlug);
 router.get("/", getProducts)
 router.get("/:id", getProduct);
 

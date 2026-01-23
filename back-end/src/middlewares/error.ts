@@ -17,7 +17,6 @@ export const errorHandler = (
         });
     }
 
-    // Multer errors
     if (err.name === 'MulterError') {
         if (err.message.includes('File too large')) {
             return res.status(400).json({
@@ -61,7 +60,6 @@ export const errorHandler = (
         }
     }
 
-    console.log('ERROR', err);
     return res.status(500).json({
         status: 'error',
         message: 'Bir şeyler yanlış gitti'

@@ -16,9 +16,6 @@ interface MonthlyRevenue {
 
 
 export const getDashboardStats = async () => {
-    console.log('[AdminStatsService] getDashboardStats called');
-
-
     const [
         totalUsers,
         totalProducts,
@@ -80,8 +77,6 @@ export const getDashboardStats = async () => {
         }),
     ]);
 
-    console.log('[AdminStatsService] Dashboard stats calculated');
-
     return {
         users: {
             total: totalUsers,
@@ -104,8 +99,6 @@ export const getDashboardStats = async () => {
 
 
 export const getOrderStatusStats = async () => {
-    console.log('[AdminStatsService] getOrderStatusStats called');
-
     const statusCounts = await prisma.order.groupBy({
         by: ['status'],
         _count: {
@@ -118,13 +111,10 @@ export const getOrderStatusStats = async () => {
         return acc;
     }, {} as Record<string, number>);
 
-    console.log('[AdminStatsService] Order status stats calculated');
     return stats;
 };
 
 export const getLast7DaysSales = async () => {
-    console.log('[AdminStatsService] getLast7DaysSales called');
-
     const last7Days: DailySales[] = [];
     const today = new Date();
 
@@ -175,8 +165,6 @@ export const getLast7DaysSales = async () => {
 
 
 export const getTopSellingProducts = async (limit: number = 10) => {
-    console.log('[AdminStatsService] getTopSellingProducts called with limit:', limit);
-
     const topProducts = await prisma.orderItem.groupBy({
         by: ['variantId'],
         _sum: {
@@ -216,11 +204,9 @@ export const getTopSellingProducts = async (limit: number = 10) => {
         })
     );
 
-    console.log('[AdminStatsService] Top selling products calculated');
     return productsWithDetails;
 };
 export const getRecentUsers = async (limit: number = 10) => {
-    console.log('[AdminStatsService] getRecentUsers called with limit:', limit);
 
     const users = await prisma.user.findMany({
         select: {
@@ -237,13 +223,10 @@ export const getRecentUsers = async (limit: number = 10) => {
         take: limit,
     });
 
-    console.log('[AdminStatsService] Recent users fetched');
     return users;
 };
 
 export const getLowStockProducts = async (threshold: number = 10) => {
-    console.log('[AdminStatsService] getLowStockProducts called with threshold:', threshold);
-
     const lowStockVariants = await prisma.productVariant.findMany({
         where: {
             stockCount: {
@@ -274,14 +257,11 @@ export const getLowStockProducts = async (threshold: number = 10) => {
         price: Number(v.price).toFixed(2),
     }));
 
-    console.log('[AdminStatsService] Low stock products fetched');
     return formatted;
 };
 
 
 export const getProductsByCategory = async () => {
-    console.log('[AdminStatsService] getProductsByCategory called');
-
     const categories = await prisma.category.findMany({
         include: {
             _count: {
@@ -300,13 +280,11 @@ export const getProductsByCategory = async () => {
         }))
         .sort((a, b) => b.productCount - a.productCount);
 
-    console.log('[AdminStatsService] Products by category fetched');
     return formatted;
 };
 
 export const getMonthlyRevenue = async (year?: number) => {
     const targetYear = year || new Date().getFullYear();
-    console.log('[AdminStatsService] getMonthlyRevenue called for year:', targetYear);
 
     const monthlyData: MonthlyRevenue[] = [];
 
@@ -340,6 +318,5 @@ export const getMonthlyRevenue = async (year?: number) => {
         });
     }
 
-    console.log('[AdminStatsService] Monthly revenue calculated');
     return monthlyData;
 };

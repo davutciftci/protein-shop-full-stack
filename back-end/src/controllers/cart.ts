@@ -7,140 +7,100 @@ import {
     clearCart,
 } from '../services/cart';
 import { AuthenticatedRequest } from 'src/middlewares/auth';
+import { asyncHandler } from '../utils/asyncHandler';
 
 
-export const getCart = async (
+export const getCart = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const userId = req.user?.userId!;
-        console.log('[CartController] getCart - User ID:', userId);
+    const userId = req.user?.userId!;
 
-        const cart = await getOrCreateCart(userId);
+    const cart = await getOrCreateCart(userId);
 
+    const totalPrice = cart.items.reduce((total, item) => {
+        return total + (Number(item.variant.price) * item.quantity);
+    }, 0);
 
-        const totalPrice = cart.items.reduce((total, item) => {
-            return total + (Number(item.variant.price) * item.quantity);
-        }, 0);
-
-        console.log('[CartController] getCart - Success, cart has', cart.items.length, 'items');
-
-        res.status(200).json({
-            status: 'success',
-            data: {
-                cart,
-                summary: {
-                    itemCount: cart.items.length,
-                    totalPrice: totalPrice.toFixed(2),
-                },
+    res.status(200).json({
+        status: 'success',
+        data: {
+            cart,
+            summary: {
+                itemCount: cart.items.length,
+                totalPrice: totalPrice.toFixed(2),
             },
-        });
-    } catch (error) {
-        console.log('[CartController] getCart - Error:', error);
-        next(error);
-    }
-};
+        },
+    });
+});
 
-export const addItemToCart = async (
+export const addItemToCart = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const userId = req.user?.userId!;
-        const { variantId, quantity } = req.body;
-        console.log('[CartController] addItemToCart - User ID:', userId, 'Body:', req.body);
+    const userId = req.user?.userId!;
+    const { variantId, quantity } = req.body;
 
-        const cart = await addToCart(userId, variantId, quantity);
+    const cart = await addToCart(userId, variantId, quantity);
 
-        console.log('[CartController] addItemToCart - Success');
-
-        res.status(200).json({
-            status: 'success',
-            message: 'Ürün sepete eklendi',
-            data: cart,
-        });
-    } catch (error) {
-        console.log('[CartController] addItemToCart - Error:', error);
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        message: 'Ürün sepete eklendi',
+        data: cart,
+    });
+});
 
 
-export const updateCartItem = async (
+export const updateCartItem = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const userId = req.user?.userId!;
-        const itemId = parseInt(req.params.itemId);
-        const { quantity } = req.body;
-        console.log('[CartController] updateCartItem - User ID:', userId, 'Item ID:', itemId, 'Quantity:', quantity);
+    const userId = req.user?.userId!;
+    const itemId = parseInt(req.params.itemId);
+    const { quantity } = req.body;
 
-        const cart = await updateCartItemQuantity(userId, itemId, quantity);
+    const cart = await updateCartItemQuantity(userId, itemId, quantity);
 
-        console.log('[CartController] updateCartItem - Success');
-
-        res.status(200).json({
-            status: 'success',
-            message: 'Ürün miktarı güncellendi',
-            data: cart,
-        });
-    } catch (error) {
-        console.log('[CartController] updateCartItem - Error:', error);
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        message: 'Ürün miktarı güncellendi',
+        data: cart,
+    });
+});
 
 
-export const removeCartItem = async (
+export const removeCartItem = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const userId = req.user?.userId!;
-        const itemId = parseInt(req.params.itemId);
-        console.log('[CartController] removeCartItem - User ID:', userId, 'Item ID:', itemId);
+    const userId = req.user?.userId!;
+    const itemId = parseInt(req.params.itemId);
 
-        const cart = await removeFromCart(userId, itemId);
+    const cart = await removeFromCart(userId, itemId);
 
-        console.log('[CartController] removeCartItem - Success');
+    res.status(200).json({
+        status: 'success',
+        message: 'Ürün sepetten çıkarıldı',
+        data: cart,
+    });
+});
 
-        res.status(200).json({
-            status: 'success',
-            message: 'Ürün sepetten çıkarıldı',
-            data: cart,
-        });
-    } catch (error) {
-        console.log('[CartController] removeCartItem - Error:', error);
-        next(error);
-    }
-};
-
-export const clearUserCart = async (
+export const clearUserCart = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
-    try {
-        const userId = req.user?.userId!;
-        console.log('[CartController] clearUserCart - User ID:', userId);
+    const userId = req.user?.userId!;
 
-        const cart = await clearCart(userId);
+    const cart = await clearCart(userId);
 
-        console.log('[CartController] clearUserCart - Success');
-
-        res.status(200).json({
-            status: 'success',
-            message: 'Sepet temizlendi',
-            data: cart,
-        });
-    } catch (error) {
-        console.log('[CartController] clearUserCart - Error:', error);
-        next(error);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        message: 'Sepet temizlendi',
+        data: cart,
+    });
+});

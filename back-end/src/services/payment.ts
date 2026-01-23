@@ -76,8 +76,6 @@ export const processPayment = async (
     },
     userId: number
 ) => {
-    console.log('[PaymentService] processPayment called for order:', orderId);
-
     const order = await prisma.order.findUnique({
         where: { id: orderId },
         include: {
@@ -86,22 +84,18 @@ export const processPayment = async (
     });
 
     if (!order) {
-        console.log('[PaymentService] Order not found:', orderId);
         throw new NotFoundError('Sipariş bulunamadı');
     }
 
     if (order.userId !== userId) {
-        console.log('[PaymentService] Order does not belong to user');
         throw new BadRequestError('Bu sipariş size ait değil');
     }
 
     if (order.paymentStatus === 'paid') {
-        console.log('[PaymentService] Order already paid:', orderId);
         throw new BadRequestError('Bu sipariş zaten ödenmiş');
     }
 
     if (!validateCardNumber(cardDetails.cardNumber)) {
-        console.log('[PaymentService] Invalid card number');
         throw new BadRequestError('Geçersiz kart numarası');
     }
 
@@ -111,7 +105,6 @@ export const processPayment = async (
     const expireMonth = parseInt(cardDetails.expireMonth);
 
     if (expireYear < currentYear || (expireYear === currentYear && expireMonth < currentMonth)) {
-        console.log('[PaymentService] Card expired');
         throw new BadRequestError('Kartın son kullanma tarihi geçmiş');
     }
 
@@ -125,10 +118,8 @@ export const processPayment = async (
 
     if (testCards.includes(cardDetails.cardNumber)) {
         isSuccess = true;
-        console.log('[PaymentService] Test card detected - Payment will succeed');
     } else {
         isSuccess = Math.random() < 0.9;
-        console.log('[PaymentService] Random payment result:', isSuccess ? 'SUCCESS' : 'FAILURE');
     }
     await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
 
@@ -163,8 +154,6 @@ export const processPayment = async (
     });
 
     if (isSuccess) {
-        console.log('[PaymentService] Payment successful, updating order to CONFIRMED');
-
         await prisma.order.update({
             where: { id: order.id },
             data: {
@@ -174,8 +163,6 @@ export const processPayment = async (
             },
         });
     } else {
-        console.log('[PaymentService] Payment failed');
-
         await prisma.order.update({
             where: { id: order.id },
             data: {
@@ -184,14 +171,11 @@ export const processPayment = async (
         });
     }
 
-    console.log('[PaymentService] Payment processed:', paymentStatus);
     return payment;
 };
 
 
 export const getPaymentStatus = async (orderId: number) => {
-    console.log('[PaymentService] getPaymentStatus called for order:', orderId);
-
     const payment = await prisma.payment.findFirst({
         where: { orderId },
         include: {
@@ -213,11 +197,9 @@ export const getPaymentStatus = async (orderId: number) => {
     });
 
     if (!payment) {
-        console.log('[PaymentService] Payment not found for order:', orderId);
         throw new NotFoundError('Ödeme kaydı bulunamadı');
     }
 
-    console.log('[PaymentService] Payment status:', payment.status);
     return payment;
 };
 

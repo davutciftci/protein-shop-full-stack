@@ -12,11 +12,6 @@ import { addToCartSchema, updateCartItemSchema } from '../validators/cart';
 
 const router = Router();
 
-router.use((req, res, next) => {
-    console.log(`[CartRoutes] ${req.method} ${req.originalUrl}`);
-    next();
-});
-
 router.use(authenticate);
 router.get('/', getCart);
 router.post('/items', validate(addToCartSchema), addItemToCart);

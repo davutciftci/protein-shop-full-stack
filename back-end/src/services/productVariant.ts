@@ -3,15 +3,11 @@ import { ConflictError, NotFoundError, BadRequestError } from '../utils/customEr
 
 
 export const getVariantsByProductId = async (productId: number) => {
-    console.log('[VariantService] getVariantsByProductId called with productId:', productId);
-
-
     const product = await prisma.product.findUnique({
         where: { id: productId },
     });
 
     if (!product) {
-        console.log('[VariantService] Product not found:', productId);
         throw new NotFoundError('Ürün bulunamadı');
     }
 
@@ -29,14 +25,11 @@ export const getVariantsByProductId = async (productId: number) => {
         orderBy: { createdAt: 'desc' },
     });
 
-    console.log('[VariantService] Found variants:', variants.length);
     return variants;
 };
 
 
 export const getVariantById = async (id: number) => {
-    console.log('[VariantService] getVariantById called with id:', id);
-
     const variant = await prisma.productVariant.findUnique({
         where: { id },
         include: {
@@ -45,11 +38,9 @@ export const getVariantById = async (id: number) => {
     });
 
     if (!variant) {
-        console.log('[VariantService] Variant not found:', id);
         throw new NotFoundError('Varyant bulunamadı');
     }
 
-    console.log('[VariantService] Variant found:', variant.id);
     return variant;
 };
 
@@ -65,15 +56,11 @@ export const createVariant = async (data: {
     servings?: string;
     isActive?: boolean;
 }) => {
-    console.log('[VariantService] createVariant called with data:', data);
-
-
     const existingVariant = await prisma.productVariant.findUnique({
         where: { sku: data.sku },
     });
 
     if (existingVariant) {
-        console.log('[VariantService] SKU already exists:', data.sku);
         throw new ConflictError('Bu SKU zaten kullanılıyor');
     }
 
@@ -82,12 +69,10 @@ export const createVariant = async (data: {
     });
 
     if (!product) {
-        console.log('[VariantService] Product not found:', data.productId);
         throw new NotFoundError('Ürün bulunamadı');
     }
 
     if (!product.isActive) {
-        console.log('[VariantService] Product is not active:', data.productId);
         throw new BadRequestError('Pasif bir ürüne varyant eklenemez');
     }
 
@@ -109,7 +94,6 @@ export const createVariant = async (data: {
         },
     });
 
-    console.log('[VariantService] Variant created successfully:', variant.id);
     return variant;
 };
 
@@ -127,8 +111,6 @@ export const updateVariant = async (
         isActive?: boolean;
     }
 ) => {
-    console.log('[VariantService] updateVariant called with id:', id, 'data:', data);
-
     await getVariantById(id);
 
     if (data.sku) {
@@ -137,7 +119,6 @@ export const updateVariant = async (
         });
 
         if (existingVariant && existingVariant.id !== id) {
-            console.log('[VariantService] SKU already exists on another variant:', data.sku);
             throw new ConflictError('Bu SKU zaten başka bir varyantта kullanılıyor');
         }
     }
@@ -150,20 +131,16 @@ export const updateVariant = async (
         },
     });
 
-    console.log('[VariantService] Variant updated successfully:', variant.id);
     return variant;
 };
 
 
 export const deleteVariant = async (id: number) => {
-    console.log('[VariantService] deleteVariant called with id:', id);
-
     await getVariantById(id);
 
     const variant = await prisma.productVariant.delete({
         where: { id },
     });
 
-    console.log('[VariantService] Variant deleted successfully:', id);
     return variant;
 };

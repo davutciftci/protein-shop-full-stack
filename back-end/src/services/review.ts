@@ -2,7 +2,6 @@ import prisma from '../utils/prisma';
 import { NotFoundError, BadRequestError, UnauthorizedError } from '../utils/customErrors';
 import { OrderStatus } from '../../generated/prisma';
 
-// Kullanıcı bu ürünü satın aldı mı ve teslim edildi mi kontrol
 export const canUserReviewProduct = async (userId: number, productId: number, orderId: number): Promise<boolean> => {
     const order = await prisma.order.findFirst({
         where: {
@@ -20,7 +19,6 @@ export const canUserReviewProduct = async (userId: number, productId: number, or
     return !!order;
 };
 
-// Review oluştur
 export const createReview = async (
     userId: number,
     productId: number,
@@ -29,13 +27,11 @@ export const createReview = async (
     rating: number,
     comment: string
 ) => {
-    // Kullanıcı bu ürünü satın aldı mı kontrol
     const canReview = await canUserReviewProduct(userId, productId, orderId);
     if (!canReview) {
         throw new BadRequestError('Bu ürün için yorum yapamazsınız. Ürün satın alınmalı ve teslim edilmiş olmalıdır.');
     }
 
-    // Daha önce bu sipariş için yorum yapmış mı?
     const existingReview = await prisma.productComment.findFirst({
         where: { userId, productId, orderId, orderItemId }
     });
@@ -66,7 +62,6 @@ export const createReview = async (
     });
 };
 
-// Ürün yorumlarını getir (sadece onaylananlar)
 export const getProductReviews = async (productId: number) => {
     return await prisma.productComment.findMany({
         where: {
@@ -88,7 +83,6 @@ export const getProductReviews = async (productId: number) => {
     });
 };
 
-// Tüm yorumları getir (Footer için)
 export const getAllApprovedReviews = async (limit: number = 10) => {
     return await prisma.productComment.findMany({
         where: {
@@ -117,7 +111,6 @@ export const getAllApprovedReviews = async (limit: number = 10) => {
     });
 };
 
-// Kullanıcının yorum yapabileceği ürünleri getir
 export const getUserReviewableOrders = async (userId: number) => {
     const orders = await prisma.order.findMany({
         where: {

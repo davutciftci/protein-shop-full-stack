@@ -15,144 +15,121 @@ interface RegisterRequest {
 }
 
 export const register = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { firstName, lastName, email, password, birth_date } = req.body as RegisterRequest;
-        const user = await createUser({
-            firstName,
-            lastName,
-            email,
-            password,
-            birthDay: new Date(birth_date)
-        });
+    const { firstName, lastName, email, password, birth_date } = req.body as RegisterRequest;
+    const user = await createUser({
+        firstName,
+        lastName,
+        email,
+        password,
+        birthDay: new Date(birth_date)
+    });
 
-        const { hashedPassword, ...userWithoutPassword } = user;
+    const { hashedPassword, ...userWithoutPassword } = user;
 
-        return res.status(201).json({
-            status: "success",
-            message: 'Kullanıcı başarıyla oluşturuldu',
-            data: userWithoutPassword
-        });
-    } catch (error) {
-        next(error)
-    }
-
+    return res.status(201).json({
+        status: "success",
+        message: 'Kullanıcı başarıyla oluşturuldu',
+        data: userWithoutPassword
+    });
 });
 
 export const login = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { email, password } = req.body;
+    const { email, password } = req.body;
 
-        const { user, token } = await loginUser(email, password);
+    const { user, token } = await loginUser(email, password);
 
-        return res.status(200).json({
-            status: 'success',
-            message: 'Giriş yapıldı',
-            data: { user, token },
-        });
-    } catch (error) {
-        next(error)
-    }
+    return res.status(200).json({
+        status: 'success',
+        message: 'Giriş yapıldı',
+        data: { user, token },
+    });
 });
 
 export const getProfile = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
 
-    try {
-        const userId = (req as AuthenticatedRequest).user?.userId;
+    const userId = (req as AuthenticatedRequest).user?.userId;
 
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                phoneNumber: true,
-                birthDay: true,
-                role: true,
-                createdAt: true,
-                updatedAt: true,
-            }
-        });
-
-        if (!userId) {
-            throw new NotFoundError('Kullanıcı bulunamadı');
-        }
-
-        return res.status(200).json({
-            status: 'success',
-            data: user,
-        });
-    } catch (error) {
-        next(error)
+    if (!userId) {
+        throw new NotFoundError('Kullanıcı bulunamadı');
     }
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phoneNumber: true,
+            birthDay: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+        }
+    });
+    if (!user) {
+        throw new NotFoundError('Kullanıcı bulunamadı');
+    }
+
+    return res.status(200).json({
+        status: 'success',
+        data: user,
+    });
 
 });
 
 export const requestPasswordResetController = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { email } = req.body;
+    const { email } = req.body;
 
-        await requestPasswordResetService(email);
+    await requestPasswordResetService(email);
 
-        return res.status(200).json({
-            status: 'success',
-            message: 'Eğer bu email adresi sistemde kayıtlıysa, şifre sıfırlama linki gönderilecektir.'
-        });
-    } catch (error) {
-        next(error);
-    }
+    return res.status(200).json({
+        status: 'success',
+        message: 'Eğer bu email adresi sistemde kayıtlıysa, şifre sıfırlama linki gönderilecektir.'
+    });
 });
 
 export const resetPasswordController = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { token, newPassword } = req.body;
+    const { token, newPassword } = req.body;
 
-        await resetPasswordService(token, newPassword);
+    await resetPasswordService(token, newPassword);
 
-        return res.status(200).json({
-            status: 'success',
-            message: 'Şifreniz başarıyla güncellendi'
-        });
-    } catch (error) {
-        next(error);
-    }
+    return res.status(200).json({
+        status: 'success',
+        message: 'Şifreniz başarıyla güncellendi'
+    });
 });
 
 export const updateProfile = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const userId = (req as AuthenticatedRequest).user?.userId;
-        const { firstName, lastName, phoneNumber } = req.body;
+    const userId = (req as AuthenticatedRequest).user?.userId;
+    const { firstName, lastName, phoneNumber } = req.body;
 
-        if (!userId) {
-            throw new NotFoundError('Kullanıcı bulunamadı');
-        }
-
-        const updatedUser = await prisma.user.update({
-            where: { id: userId },
-            data: {
-                ...(firstName && { firstName }),
-                ...(lastName && { lastName }),
-                ...(phoneNumber !== undefined && { phoneNumber }),
-            },
-            select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                phoneNumber: true,
-                birthDay: true,
-                role: true,
-                createdAt: true,
-                updatedAt: true,
-            }
-        });
-
-        return res.status(200).json({
-            status: 'success',
-            message: 'Profil başarıyla güncellendi',
-            data: updatedUser,
-        });
-    } catch (error) {
-        next(error);
+    if (!userId) {
+        throw new NotFoundError('Kullanıcı bulunamadı');
     }
+
+    const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+            ...(firstName && { firstName }),
+            ...(lastName && { lastName }),
+            ...(phoneNumber !== undefined && { phoneNumber }),
+        },
+        select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phoneNumber: true,
+            birthDay: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+        }
+    });
+
+    return res.status(200).json({
+        status: 'success',
+        message: 'Profil başarıyla güncellendi',
+        data: updatedUser,
+    });
 });

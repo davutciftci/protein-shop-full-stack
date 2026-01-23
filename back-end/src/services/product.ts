@@ -12,8 +12,6 @@ interface ProductFilters {
 }
 
 export const searchAndFilterProducts = async (filters: ProductFilters = {}) => {
-    console.log('[ProductService] getAllProducts called with filters:', filters);
-
     const where: ProductWhereInput = {};
 
     if (filters.search) {
@@ -99,12 +97,10 @@ export const searchAndFilterProducts = async (filters: ProductFilters = {}) => {
         orderBy,
     });
 
-    console.log('[ProductService] Found products:', products.length);
     return products;
 };
 
 export const getPaginatedProducts = async (filters: ProductFilters, page: number = 1, limit: number = 12) => {
-    console.log('[ProductService] getpaginatedProducts - Page:', page, 'Limit:', limit, 'Filters:', filters);
     const where: ProductWhereInput = {};
 
     if (filters.search) {
@@ -194,8 +190,6 @@ export const getPaginatedProducts = async (filters: ProductFilters, page: number
         take: limit,
     });
 
-    console.log('[ProductService] Found paginated products:', products.length, '/', totalProducts);
-
     return {
         products,
         pagination: {
@@ -211,8 +205,6 @@ export const getPaginatedProducts = async (filters: ProductFilters, page: number
 
 
 export const getProductById = async (id: number) => {
-    console.log('[ProductService] getProductById called with id:', id);
-
     const product = await prisma.product.findUnique({
         where: { id },
         include: {
@@ -235,17 +227,13 @@ export const getProductById = async (id: number) => {
     });
 
     if (!product) {
-        console.log('[ProductService] Product not found with id:', id);
         throw new NotFoundError('Ürün bulunamadı');
     }
 
-    console.log('[ProductService] Product found:', product.id);
     return product;
 };
 
 export const getProductBySlugService = async (slug: string) => {
-    console.log('[ProductService] getProductBySlugService called with slug:', slug);
-
     const product = await prisma.product.findUnique({
         where: { slug },
         include: {
@@ -268,11 +256,9 @@ export const getProductBySlugService = async (slug: string) => {
     });
 
     if (!product) {
-        console.log('[ProductService] Product not found with slug:', slug);
         throw new NotFoundError('Ürün bulunamadı');
     }
 
-    console.log('[ProductService] Product found by slug:', product.id);
     return product;
 };
 
@@ -310,14 +296,11 @@ export const createProduct = async (data: {
         displayOrder?: number;
     }>;
 }) => {
-    console.log('[ProductService] createProduct called with data:', data);
-
     const existingProduct = await prisma.product.findUnique({
         where: { slug: data.slug },
     });
 
     if (existingProduct) {
-        console.log('[ProductService] Slug already exists:', data.slug);
         throw new ConflictError('Bu slug zaten kullanılıyor');
     }
 
@@ -326,16 +309,13 @@ export const createProduct = async (data: {
     });
 
     if (!category) {
-        console.log('[ProductService] Category not found:', data.categoryId);
         throw new NotFoundError('Kategori bulunamadı');
     }
 
     if (!category.isActive) {
-        console.log('[ProductService] Category is not active:', data.categoryId);
         throw new BadRequestError('Pasif bir kategoriye ürün eklenemez');
     }
 
-    // Varyantları ve fotoğrafları oluşturmak için prisma transaction kullan
     const product = await prisma.product.create({
         data: {
             name: data.name,
@@ -382,7 +362,6 @@ export const createProduct = async (data: {
         },
     });
 
-    console.log('[ProductService] Product created successfully:', product.id);
     return product;
 };
 
@@ -423,8 +402,6 @@ export const updateProduct = async (
         }>;
     }
 ) => {
-    console.log('[ProductService] updateProduct called with id:', id, 'data:', data);
-
     await getProductById(id);
 
     if (data.slug) {
@@ -433,7 +410,6 @@ export const updateProduct = async (
         });
 
         if (existingProduct && existingProduct.id !== id) {
-            console.log('[ProductService] Slug already exists on another product:', data.slug);
             throw new ConflictError('Bu slug zaten başka bir üründe kullanılıyor');
         }
     }
@@ -444,20 +420,16 @@ export const updateProduct = async (
         });
 
         if (!category) {
-            console.log('[ProductService] Category not found:', data.categoryId);
             throw new NotFoundError('Kategori bulunamadı');
         }
 
         if (!category.isActive) {
-            console.log('[ProductService] Category is not active:', data.categoryId);
             throw new BadRequestError('Pasif bir kategoriye ürün taşınamaz');
         }
     }
 
-    // Extract variants and photos from data to handle separately
     const { variants, photos, ...productData } = data;
 
-    // Convert expirationDate string to Date object if it's a string
     const updateData = {
         ...productData,
         expirationDate: productData.expirationDate
@@ -511,12 +483,10 @@ export const updateProduct = async (
         },
     });
 
-    console.log('[ProductService] Product updated successfully:', product.id);
     return product;
 };
 
 export const deleteProduct = async (id: number) => {
-    console.log('[ProductService] deleteProduct called with id:', id);
 
     await getProductById(id);
 
@@ -524,6 +494,5 @@ export const deleteProduct = async (id: number) => {
         where: { id },
     });
 
-    console.log('[ProductService] Product deleted successfully:', id);
     return product;
 };

@@ -15,12 +15,8 @@ import { validate } from '../middlewares/validate';
 import { createCommentSchema, updateCommentSchema, approveCommentSchema } from '../validators/productComment';
 import { UserRole } from '../../generated/prisma';
 
-const router = Router();
 
-router.use((req, res, next) => {
-    console.log(`[CommentRoutes] ${req.method} ${req.originalUrl}`);
-    next();
-});
+const router = Router();
 
 router.get('/approved', async (req, res, next) => {
     try {

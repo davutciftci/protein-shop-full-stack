@@ -12,11 +12,6 @@ import { createAddressSchema, updateAddressSchema } from '../validators/userAddr
 
 const router = Router();
 
-router.use((req, res, next) => {
-    console.log(`[AddressRoutes] ${req.method} ${req.originalUrl}`);
-    next();
-});
-
 
 router.use(authenticate);
 router.get('/my', getMyAddresses);

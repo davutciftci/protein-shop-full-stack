@@ -13,12 +13,8 @@ import { validate } from '../middlewares/validate';
 import { createOrderSchema, updateOrderStatusSchema } from '../validators/order';
 import { UserRole } from '../../generated/prisma';
 
-const router = Router();
 
-router.use((req, res, next) => {
-    console.log(`[OrderRoutes] ${req.method} ${req.originalUrl}`);
-    next();
-});
+const router = Router();
 
 router.use(authenticate);
 

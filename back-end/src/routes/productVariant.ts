@@ -15,12 +15,6 @@ import { UserRole } from "../../generated/prisma";
 const router = Router();
 
 
-router.use((req, res, next) => {
-    console.log(`[VariantRoutes] ${req.method} ${req.originalUrl}`);
-    next();
-});
-
-
 router.get('/product/:productId', getProductVariants);
 router.get('/:id', getVariant);
 
