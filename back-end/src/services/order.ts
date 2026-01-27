@@ -170,7 +170,6 @@ export const createOrder = async (
         }
     }
 
-    // Helper function to calculate discounted price
     const calculateDiscountedPrice = (price: number, discount?: number | null): number => {
         if (!discount || discount <= 0) {
             return price;
@@ -185,7 +184,7 @@ export const createOrder = async (
         return total + (discountedPrice * item.quantity);
     }, 0);
 
-    // Kargo metodunu bul
+
     const shippingMethod = await prisma.shippingMethod.findUnique({
         where: { code: shippingMethodCode }
     });

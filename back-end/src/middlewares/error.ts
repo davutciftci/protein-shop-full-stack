@@ -9,11 +9,39 @@ export const errorHandler = (
     res: Response,
     next: NextFunction
 ) => {
+
+    if (process.env.NODE_ENV === 'production') {
+        console.error('Error:', {
+            message: err.message,
+            stack: err.stack,
+            timestamp: new Date().toISOString(),
+            path: req.path,
+            method: req.method
+        });
+    }
+
+    if (err.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+            status: 'error',
+            message: 'Geçersiz token',
+            ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+        });
+    }
+
+    if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({
+            status: 'error',
+            message: 'Token süresi dolmuş',
+            ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+        });
+    }
+
     if (err instanceof ValidationError) {
         return res.status(err.statusCode).json({
             status: 'error',
             message: err.message,
-            errors: err.errors
+            errors: err.errors,
+            ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
         });
     }
 
@@ -21,25 +49,40 @@ export const errorHandler = (
         if (err.message.includes('File too large')) {
             return res.status(400).json({
                 status: 'error',
-                message: 'Dosya boyutu çok büyük (maksimum 5MB)'
+                message: 'Dosya boyutu çok büyük (maksimum 5MB)',
+                ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
             });
         }
         if (err.message.includes('Unexpected field')) {
             return res.status(400).json({
                 status: 'error',
-                message: 'Beklenmeyen dosya alanı'
+                message: 'Beklenmeyen dosya alanı',
+                ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
             });
         }
         return res.status(400).json({
             status: 'error',
-            message: `Dosya yükleme hatası: ${err.message}`
+            message: `Dosya yükleme hatası: ${err.message}`,
+            ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
         });
     }
 
     if (err instanceof AppError) {
         return res.status(err.statusCode).json({
             status: 'error',
-            message: err.message
+            message: err.message,
+            ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+        });
+    }
+
+    if (err.constructor.name === 'PrismaClientInitializationError') {
+        return res.status(503).json({
+            status: 'error',
+            message: 'Veritabanı bağlantı hatası',
+            ...(process.env.NODE_ENV === 'development' && { 
+                stack: err.stack,
+                details: err.message 
+            })
         });
     }
 
@@ -48,20 +91,43 @@ export const errorHandler = (
             const field = (err.meta?.target as string[])?.[0] || 'alan';
             return res.status(409).json({
                 status: 'error',
-                message: `Bu ${field} zaten kullanılıyor`
-            })
-        }
-
-        if (err.code == 'P2025') {
-            return res.status(404).json({
-                status: 'error',
-                message: 'Kayıt bulunamadı'
+                message: `Bu ${field} zaten kullanılıyor`,
+                ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
             });
         }
+
+        // Record not found
+        if (err.code === 'P2025') {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Kayıt bulunamadı',
+                ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+            });
+        }
+
+        if (err.code === 'P2003') {
+            return res.status(400).json({
+                status: 'error',
+                message: 'İlişkili kayıt bulunamadı',
+                ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+            });
+        }
+
+        return res.status(400).json({
+            status: 'error',
+            message: 'Veritabanı işlemi başarısız',
+            ...(process.env.NODE_ENV === 'development' && { 
+                stack: err.stack,
+                code: err.code 
+            })
+        });
     }
 
     return res.status(500).json({
         status: 'error',
-        message: 'Bir şeyler yanlış gitti'
+        message: process.env.NODE_ENV === 'production' 
+            ? 'Bir şeyler yanlış gitti' 
+            : err.message,
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
     });
 };
