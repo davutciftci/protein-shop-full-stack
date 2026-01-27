@@ -4,7 +4,8 @@ import { ChevronDown, Truck, ShoppingCart } from 'lucide-react';
 import { MdOutlineStar } from 'react-icons/md';
 import { productService } from '../../services/productService';
 import { getAromaColor } from '../../constants/productOptions';
-import type { Product } from '../../types';
+import type { Product, ProductVariant, ProductComment } from '../../types';
+import type { NutritionValue } from '../../types/cart';
 import { useCart } from '../../context/CartContext';
 import { BsArrowClockwise } from 'react-icons/bs';
 
@@ -27,13 +28,13 @@ export default function ProductDetailPage() {
         const selectedSizeWeight = product.sizes?.[selectedSize]?.weight;
 
         let variant = product.variants?.find(
-            (v: any) => v.aroma === selectedAromaName && v.size === selectedSizeWeight
+            (v: ProductVariant) => v.aroma === selectedAromaName && v.size === selectedSizeWeight
         );
         if (!variant) {
-            variant = product.variants?.find((v: any) => v.size === selectedSizeWeight);
+            variant = product.variants?.find((v: ProductVariant) => v.size === selectedSizeWeight);
         }
         if (!variant) {
-            variant = product.variants?.find((v: any) => v.aroma === selectedAromaName);
+            variant = product.variants?.find((v: ProductVariant) => v.aroma === selectedAromaName);
         }
         if (!variant && product.variants?.length) {
             variant = product.variants[0];
@@ -89,13 +90,13 @@ export default function ProductDetailPage() {
                             name: v.aroma || v.name,
                             color: '#000'
                         })) || [],
-                    nutritionInfo: productData.nutritionValues?.values?.map((nv: { name: string; value: string; unit: string }) =>
+                    nutritionInfo: productData.nutritionValues?.values?.map((nv: NutritionValue) =>
                         `${nv.name}: ${nv.value} ${nv.unit}`
                     ) || productData.nutritionInfo || [],
                     reviews: 0,
                     rating: 5,
                 };
-                setProduct(mappedProduct as any);
+                setProduct(mappedProduct);
                 setQuantity(1);
                 setSelectedAroma(0);
                 setSelectedSize(0);
@@ -135,14 +136,14 @@ export default function ProductDetailPage() {
         const selectedSizeWeight = product.sizes?.[selectedSize]?.weight;
 
         let variant = product.variants.find(
-            (v: any) => v.aroma === selectedAromaName && v.size === selectedSizeWeight
+            (v: ProductVariant) => v.aroma === selectedAromaName && v.size === selectedSizeWeight
         );
         if (!variant) {
-            variant = product.variants.find((v: any) => v.size === selectedSizeWeight);
+            variant = product.variants.find((v: ProductVariant) => v.size === selectedSizeWeight);
         }
 
         if (!variant) {
-            variant = product.variants.find((v: any) => v.aroma === selectedAromaName);
+            variant = product.variants.find((v: ProductVariant) => v.aroma === selectedAromaName);
         }
         return variant || product.variants[0];
     };
@@ -386,11 +387,11 @@ export default function ProductDetailPage() {
             const selectedAromaName = product.aromas[selectedAroma]?.name;
 
             const variant = product.variants.find(
-                (v: any) => v.aroma === selectedAromaName && v.size === sizeWeight
+                (v: ProductVariant) => v.aroma === selectedAromaName && v.size === sizeWeight
             );
 
             if (!variant) {
-                const sizeVariant = product.variants.find((v: any) => v.size === sizeWeight);
+                const sizeVariant = product.variants.find((v: ProductVariant) => v.size === sizeWeight);
                 return sizeVariant?.discount ? Number(sizeVariant.discount) : 0;
             }
 
@@ -696,7 +697,7 @@ export default function ProductDetailPage() {
                             const reviews = product.comments || [];
                             const totalReviews = reviews.length;
                             const ratingCounts = [0, 0, 0, 0, 0];
-                            reviews.forEach((r: any) => {
+                            reviews.forEach((r: ProductComment) => {
                                 if (r.rating >= 1 && r.rating <= 5) {
                                     ratingCounts[r.rating - 1]++;
                                 }
@@ -728,7 +729,7 @@ export default function ProductDetailPage() {
                 { }
                 <div className="space-y-4 mb-8">
                     {(product.comments && product.comments.length > 0) ? (
-                        product.comments.map((review: any, index: number) => (
+                        product.comments.map((review: ProductComment, index: number) => (
                             <div
                                 key={index}
                                 className={`bg-[#F7F7F7] px-6 py-8 rounded-[30px] ${index >= 3 ? 'hidden md:block' : ''}`}

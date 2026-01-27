@@ -1,31 +1,12 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { apiClient } from '../api/client';
-
-export interface CartItem {
-    id: number;
-    name: string;
-    cartItemId: number;
-    description: string;
-    price: number;
-    image: string;
-    quantity: number;
-    aroma?: string;
-    size?: string | number;
-    variantId?: number;
-    slug?: string;
-    categorySlug?: string;
-    photos?: {
-        url: string;
-        isPrimary?: boolean;
-        displayOrder?: number;
-    }[];
-}
+import type { CartUIItem, CartItem } from '../types/cart';
 
 interface CartContextType {
-    items: CartItem[];
+    items: CartUIItem[];
     isOpen: boolean;
     showAlert: boolean;
-    addToCart: (item: Omit<CartItem, 'quantity' | 'cartItemId'>, quantity?: number) => void;
+    addToCart: (item: Omit<CartUIItem, 'quantity' | 'cartItemId'>, quantity?: number) => void;
     removeFromCart: (id: number) => void;
     updateQuantity: (id: number, quantity: number) => void;
     openCart: () => void;
@@ -38,7 +19,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-    const [items, setItems] = useState<CartItem[]>([]);
+    const [items, setItems] = useState<CartUIItem[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
 
@@ -57,7 +38,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             const backendItems = response.data.data?.cart?.items || [];
             console.log('fetchCart backend items:', backendItems);
 
-            const formattedItems = backendItems.map((item: any) => {
+            const formattedItems: CartUIItem[] = backendItems.map((item: CartItem) => {
                 console.log('Mapping item:', item);
                 return {
                     id: item.variant.product.id,
@@ -67,7 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                     image: item.variant.product.photos?.[0]?.url || '/placeholder.png',
                     quantity: item.quantity,
                     aroma: item.variant.aroma,
-                    size: item.variant.size?.item || item.variantId,
+                    size: item.variant.size || item.variantId,
                     variantId: item.variantId,
                     slug: item.variant.product.slug,
                     categorySlug: '',
@@ -86,7 +67,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         fetchCart();
     }, []);
 
-    const addToCart = async (newItem: Omit<CartItem, 'quantity' | 'cartItemId'>, quantity: number = 1) => {
+    const addToCart = async (newItem: Omit<CartUIItem, 'quantity' | 'cartItemId'>, quantity: number = 1) => {
         console.log('addToCart çağrıldı:', { newItem, quantity });
         try {
             const token = localStorage.getItem('authToken');

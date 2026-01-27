@@ -1,3 +1,5 @@
+import type { NutritionValues, AminoAcids } from './cart';
+
 export interface Category {
     id: number;
     name: string;
@@ -44,6 +46,8 @@ export interface ProductComment {
     id: number;
     rating: number;
     comment: string;
+    title?: string;
+    userName?: string;
     isApproved: boolean;
     userId: number;
     productId: number;
@@ -83,8 +87,8 @@ export interface Product {
     expirationDate?: string;
     servingSize?: string;
     ingredients?: string;
-    nutritionValues?: any;
-    aminoAcids?: any;
+    nutritionValues?: NutritionValues;
+    aminoAcids?: AminoAcids;
     createdAt: string;
     updatedAt: string;
     variants?: ProductVariant[];
