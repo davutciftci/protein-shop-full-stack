@@ -10,6 +10,14 @@ import { AuthenticatedRequest } from 'src/middlewares/auth';
 import { asyncHandler } from '../utils/asyncHandler';
 
 
+// Helper function to calculate discounted price
+const calculateDiscountedPrice = (price: number, discount?: number | null): number => {
+    if (!discount || discount <= 0) {
+        return price;
+    }
+    return Math.round(price * (1 - discount / 100));
+};
+
 export const getCart = asyncHandler(async (
     req: AuthenticatedRequest,
     res: Response,
@@ -20,7 +28,10 @@ export const getCart = asyncHandler(async (
     const cart = await getOrCreateCart(userId);
 
     const totalPrice = cart.items.reduce((total, item) => {
-        return total + (Number(item.variant.price) * item.quantity);
+        const originalPrice = Number(item.variant.price);
+        const discount = item.variant.discount;
+        const discountedPrice = calculateDiscountedPrice(originalPrice, discount);
+        return total + (discountedPrice * item.quantity);
     }, 0);
 
     res.status(200).json({

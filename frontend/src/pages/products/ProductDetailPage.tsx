@@ -51,7 +51,7 @@ export default function ProductDetailPage() {
             variantId: selectedVariant.id,
             name: product.name,
             description: product.description || '',
-            price: Number(selectedVariant.price),
+            price: getDiscountedPrice(),
             image: product.photos?.[0]?.url || '/placeholder.png',
             aroma: selectedVariant.aroma || undefined,
             size: selectedVariant.size || undefined,
@@ -123,6 +123,11 @@ export default function ProductDetailPage() {
 
     const handleQuantityChange = (delta: number) => {
         setQuantity(prev => Math.max(1, Math.min(10, prev + delta)));
+    };
+
+    const handleManualQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(e.target.value) || 1;
+        setQuantity(Math.max(1, Math.min(10, value)));
     };
 
     const toggleSection = (section: ExpandedSection) => {
@@ -495,7 +500,14 @@ export default function ProductDetailPage() {
                             >
                                 -
                             </button>
-                            <span className="w-10 h-10 flex items-center justify-center font-medium border-x border-gray-300">{quantity}</span>
+                            <input
+                                type="number"
+                                value={quantity}
+                                onChange={handleManualQuantityChange}
+                                className="w-10 h-10 flex items-center justify-center font-medium border-x border-gray-300 text-center"
+                                min="1"
+                                max="10"
+                            />
                             <button
                                 onClick={() => handleQuantityChange(1)}
                                 className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-xl font-medium text-gray-600"
@@ -563,7 +575,14 @@ export default function ProductDetailPage() {
                                 >
                                     -
                                 </button>
-                                <span className="w-10 h-10 flex items-center justify-center font-medium border-x border-gray-300">{quantity}</span>
+                                <input
+                                    type="number"
+                                    value={quantity}
+                                    onChange={handleManualQuantityChange}
+                                    className="w-10 h-10 flex items-center justify-center font-medium border-x border-gray-300 text-center"
+                                    min="1"
+                                    max="10"
+                                />
                                 <button
                                     onClick={() => handleQuantityChange(1)}
                                     className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-xl font-medium text-gray-600"
@@ -640,7 +659,14 @@ export default function ProductDetailPage() {
                                     >
                                         -
                                     </button>
-                                    <span className="w-10 h-10 flex items-center justify-center font-medium border-x border-gray-300">{quantity}</span>
+                                    <input
+                                        type="number"
+                                        value={quantity}
+                                        onChange={handleManualQuantityChange}
+                                        className="w-10 h-10 flex items-center justify-center font-medium border-x border-gray-300 text-center"
+                                        min="1"
+                                        max="10"
+                                    />
                                     <button
                                         onClick={() => handleQuantityChange(1)}
                                         className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-xl font-medium text-gray-600"

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { VscSettings } from 'react-icons/vsc';
 import { TfiPackage } from 'react-icons/tfi';
 import { CiLocationOn } from 'react-icons/ci';
@@ -8,13 +8,16 @@ import { ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { addressService } from '../../services';
 import type { UserAddress } from '../../types';
+import { apiClient } from '../../api/client';
 
 
 
 export default function AccountPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState('account');
+    const [searchParams] = useSearchParams();
+    const tabFromUrl = searchParams.get('tab');
+    const [activeTab, setActiveTab] = useState(tabFromUrl || 'account');
     const [selectedCountry, setSelectedCountry] = useState({ code: '+90', flag: 'tr', name: 'Türkiye' });
     const [formData, setFormData] = useState({
         firstName: '',
@@ -23,13 +26,19 @@ export default function AccountPage() {
         email: ''
     });
 
-    // Kullanıcı bilgilerini formData'ya yükle
+    useEffect(() => {
+        if (tabFromUrl) {
+            setActiveTab(tabFromUrl);
+        }
+    }, [tabFromUrl]);
+
     useEffect(() => {
         if (user) {
+            const userWithPhone = user as { phoneNumber?: string; phone?: string };
             setFormData({
                 firstName: user.firstName || '',
                 lastName: user.lastName || '',
-                phone: (user as any).phoneNumber || (user as any).phone || '',
+                phone: userWithPhone.phoneNumber || userWithPhone.phone || '',
                 email: user.email || ''
             });
         }
@@ -50,7 +59,6 @@ export default function AccountPage() {
         postalCode: ''
     });
 
-    // Adresleri veritabanından çek
     useEffect(() => {
         const fetchAddresses = async () => {
             if (user) {
@@ -79,7 +87,43 @@ export default function AccountPage() {
     ];
 
 
-    const sampleOrders: any[] = [];
+    interface Order {
+        id: number;
+        orderNumber: string;
+        status: string;
+        createdAt: string;
+        totalAmount: number;
+        items?: Array<{
+            id: number;
+            variant: {
+                product: {
+                    photos: Array<{ url: string }>;
+                    name: string;
+                }
+            }
+        }>;
+    }
+
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [loadingOrders, setLoadingOrders] = useState(false);
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            if (user && activeTab === 'orders') {
+                setLoadingOrders(true);
+                try {
+                    const response = await apiClient.get('/orders/my');
+                    setOrders(response.data.data || []);
+                } catch (error) {
+                    console.error('Siparişler yüklenemedi:', error);
+                    setOrders([]);
+                } finally {
+                    setLoadingOrders(false);
+                }
+            }
+        };
+        fetchOrders();
+    }, [user, activeTab]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -125,9 +169,9 @@ export default function AccountPage() {
             alert('Bilgileriniz başarıyla güncellendi!');
 
             window.location.reload();
-        } catch (error: any) {
-            console.error('Profil güncellenirken hata:', error);
-            alert(error.message || 'Bir hata oluştu, lütfen tekrar deneyin');
+        } catch (error: unknown) {
+            const err = error as { message?: string };
+            alert(err.message || 'Bir hata oluştu, lütfen tekrar deneyin');
         }
     };
 
@@ -157,7 +201,7 @@ export default function AccountPage() {
     const handleEditAddress = (address: UserAddress) => {
         setShowAddressForm(true);
         setEditingAddressId(address.id);
-        // fullName'i firstName ve lastName'e ayır
+
         const nameParts = address.fullName.split(' ');
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
@@ -379,37 +423,51 @@ export default function AccountPage() {
 
                         {activeTab === 'orders' && (
                             <div className="px-4 md:px-8 py-4">
-                                <h2 className="text-xl font-bold mb-2">Siparişlerim ({sampleOrders.length})</h2>
+                                <h2 className="text-xl font-bold mb-2">Siparişlerim ({orders.length})</h2>
+                                {loadingOrders ? (
+                                    <div className="flex justify-center items-center py-12">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                                    </div>
+                                ) : orders.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        <p className="text-gray-500 mb-4">Henüz siparişiniz bulunmamaktadır.</p>
+                                        <Link
+                                            to="/urunler"
+                                            className="inline-block px-6 py-3 bg-black text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                                        >
+                                            Alışverişe Başla
+                                        </Link>
+                                    </div>
+                                ) : (
                                 <div className="space-y-4">
-                                    {sampleOrders.map((order) => (
+                                    {orders.map((order) => (
                                         <div key={order.id} className="border-b border-gray-200 py-4 last:border-0">
-                                            <div className="flex items-center gap-4">
-                                                <Link
-                                                    to={`/urun/${order.productSlug}`}
-                                                    className="w-20 h-20 flex-shrink-0 rounded-lg p-2 hover:bg-gray-100 transition-colors"
-                                                >
-                                                    <img
-                                                        src={order.image}
-                                                        alt={order.productName}
-                                                        className="w-full h-full object-contain"
-                                                    />
-                                                </Link>
-                                                <div className="flex-1">
-                                                    <p className="text-sm text-green-600 font-medium mb-1">{order.status}</p>
-                                                    <h3 className="text-sm font-bold text-gray-900 mb-1">{order.productName}</h3>
-                                                    <p className="text-xs text-gray-500">{order.date} Tarihinde Sipariş Verildi</p>
-                                                    <p className="text-xs text-gray-500">{order.id} numaralı sipariş</p>
+                                            <div className="flex flex-col gap-4">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <p className="text-sm text-green-600 font-medium mb-1">
+                                                            {order.status === 'PENDING' && 'Beklemede'}
+                                                            {order.status === 'CONFIRMED' && 'Onaylandı'}
+                                                            {order.status === 'SHIPPED' && 'Kargoya verildi'}
+                                                            {order.status === 'DELIVERED' && 'Teslim Edildi'}
+                                                            {order.status === 'CANCELLED' && 'İptal Edildi'}
+                                                        </p>
+                                                        <h3 className="text-sm font-bold text-gray-900 mb-1">Sipariş No: {order.orderNumber}</h3>
+                                                        <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString('tr-TR')} Tarihinde Sipariş Verildi</p>
+                                                        <p className="text-xs text-gray-500 mt-1">Toplam: {order.totalAmount} TL</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => navigate(`/siparis/${order.id}`)}
+                                                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                                    >
+                                                        Detayı Görüntüle
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={() => navigate(`/siparis/${order.id}`)}
-                                                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                                                >
-                                                    Detayı Görüntüle
-                                                </button>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
+                                )}
                             </div>
                         )}
 

@@ -9,6 +9,17 @@ export default function CartSidepanel() {
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
+    const getProductImage = (image: string) => {
+        const BACKEND_BASE_URL = 'http://localhost:3000';
+        if (image) {
+            if (image.startsWith('http')) {
+                return image;
+            }
+            return `${BACKEND_BASE_URL}${image}`;
+        }
+        return '/images/placeholder-product.jpg';
+    };
+
     const handleCheckout = () => {
         closeCart();
         if (isAuthenticated) {
@@ -50,7 +61,7 @@ export default function CartSidepanel() {
                                     <div className="flex gap-4">
                                         <div className="w-16 h-16 flex-shrink-0 bg-white p-1">
                                             <img
-                                                src={item.image}
+                                                src={getProductImage(item.image)}
                                                 alt={item.name}
                                                 className="w-full h-full object-contain"
                                             />
@@ -79,7 +90,7 @@ export default function CartSidepanel() {
                                         <div className="flex items-center bg-white rounded border border-gray-200 h-8">
                                             {item.quantity === 1 ? (
                                                 <button
-                                                    onClick={() => removeFromCart(item.id)}
+                                                    onClick={() => removeFromCart(item.cartItemId)}
                                                     className="w-8 h-full flex items-center justify-center hover:bg-gray-50 text-gray-500"
                                                 >
                                                     <FiTrash className="w-3.5 h-3.5" />
@@ -87,13 +98,13 @@ export default function CartSidepanel() {
                                             ) : (
                                                 <>
                                                     <button
-                                                        onClick={() => removeFromCart(item.id)}
+                                                        onClick={() => removeFromCart(item.cartItemId)}
                                                         className="w-8 h-full flex items-center justify-center hover:bg-gray-50 text-gray-500 border-r border-gray-100"
                                                     >
                                                         <FiTrash className="w-3.5 h-3.5" />
                                                     </button>
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                        onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
                                                         className="w-8 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600 font-medium"
                                                     >
                                                         -
@@ -106,7 +117,7 @@ export default function CartSidepanel() {
                                             </span>
 
                                             <button
-                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
                                                 className="w-8 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600 font-medium"
                                             >
                                                 +

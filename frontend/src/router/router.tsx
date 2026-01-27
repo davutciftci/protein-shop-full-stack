@@ -16,6 +16,7 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 import AccountPage from '../pages/account/AccountPage';
 import OrderDetailPage from '../pages/orders/OrderDetailPage';
+import OrderSuccessPage from '../pages/orders/OrderSuccessPage';
 import AboutPage from '../pages/about/AboutPage';
 import SalesAgreementPage from '../pages/policies/SalesAgreementPage';
 import RefundPolicyPage from '../pages/policies/RefundPolicyPage';
@@ -138,6 +139,10 @@ export const router = createBrowserRouter([
                 element: <OrderDetailPage />,
             }
         ]
+    },
+    {
+        path: '/siparis-basarili/:orderId',
+        element: <OrderSuccessPage />,
     },
     {
         path: '/odeme',

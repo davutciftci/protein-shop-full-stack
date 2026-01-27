@@ -73,9 +73,9 @@ export const createNewOrder = asyncHandler(async (
     next: NextFunction
 ) => {
     const userId = req.user?.userId!;
-    const { shippingAddressId, paymentMethod } = req.body;
+    const { shippingAddressId, paymentMethod, shippingMethodCode } = req.body;
 
-    const order = await createOrder(userId, shippingAddressId, paymentMethod || 'MANUAL');
+    const order = await createOrder(userId, shippingAddressId, paymentMethod || 'MANUAL', shippingMethodCode);
 
     res.status(201).json({
         status: 'success',

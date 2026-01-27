@@ -1,5 +1,5 @@
 import { sendEmail } from '../config/email';
-import { orderCancelledEmail, orderConfirmationEmail, orderShippedEmail, passwordResetEmail, welcomeEmail, contactFormEmail } from '../templates/email';
+import { orderCancelledEmail, orderConfirmationEmail, orderShippedEmail, orderConfirmedEmail, orderDeliveredEmail, passwordResetEmail, welcomeEmail, contactFormEmail } from '../templates/email';
 import { OrderWithRelations } from '../types';
 
 
@@ -47,6 +47,30 @@ export const sendOrderCancelledEmail = async (order: OrderWithRelations) => {
         )
     } catch (error) {
         console.error('[EmailService] Failed to send order cancelled email: ', error)
+    }
+};
+
+export const sendOrderConfirmedEmail = async (order: OrderWithRelations) => {
+    try {
+        await sendEmail(
+            order.user.email,
+            `Siparişiniz Onaylandı - ${order.orderNumber}`,
+            orderConfirmedEmail(order)
+        )
+    } catch (error) {
+        console.error('[EmailService] Failed to send order confirmed email: ', error)
+    }
+};
+
+export const sendOrderDeliveredEmail = async (order: OrderWithRelations) => {
+    try {
+        await sendEmail(
+            order.user.email,
+            `Siparişiniz Teslim Edildi - ${order.orderNumber}`,
+            orderDeliveredEmail(order)
+        )
+    } catch (error) {
+        console.error('[EmailService] Failed to send order delivered email: ', error)
     }
 };
 

@@ -1,6 +1,5 @@
 import { OrderWithRelations, OrderItemWithVariant } from '../types';
 
-// email template (tüm emaillerde ortak kısım)
 const baseTemplate = (content: string) => `
 <!DOCTYPE html>
 <html lang="tr">
@@ -85,8 +84,6 @@ const baseTemplate = (content: string) => `
 </html>
 `;
 
-// Hoşgeldin emaili
-
 export const welcomeEmail = (firstName: string) => {
   const content = `
     <h2>Hoş Geldiniz ${firstName}! 🎉</h2>
@@ -101,7 +98,6 @@ export const welcomeEmail = (firstName: string) => {
   return baseTemplate(content);
 };
 
-// Sipariş onay emaili
 export const orderConfirmationEmail = (order: OrderWithRelations) => {
   const itemsHtml = order.items.map((item: OrderItemWithVariant) => `
     <div class="product-item">
@@ -127,7 +123,6 @@ export const orderConfirmationEmail = (order: OrderWithRelations) => {
     <div class="order-details">
       <p><strong>Ara Toplam:</strong> ${order.subtotal} TL</p>
       <p><strong>Kargo:</strong> ${order.shippingCost} TL</p>
-      <p><strong>KDV:</strong> ${order.taxAmount} TL</p>
       <h3 style="margin: 10px 0;"><strong>Toplam:</strong> ${order.totalAmount} TL</h3>
     </div>
 
@@ -150,7 +145,6 @@ export const orderConfirmationEmail = (order: OrderWithRelations) => {
   return baseTemplate(content);
 };
 
-// Sipariş kargoya verildi emaili
 export const orderShippedEmail = (order: OrderWithRelations) => {
   const content = `
     <h2>Siparişiniz Kargoya Verildi! 📦</h2>
@@ -172,8 +166,6 @@ export const orderShippedEmail = (order: OrderWithRelations) => {
 
   return baseTemplate(content);
 };
-
-//Sipariş iptal edildi emaili
 
 export const orderCancelledEmail = (order: OrderWithRelations) => {
   const content = `
@@ -199,7 +191,49 @@ export const orderCancelledEmail = (order: OrderWithRelations) => {
   return baseTemplate(content);
 };
 
-//Şifre sıfırlama emaili
+export const orderConfirmedEmail = (order: OrderWithRelations) => {
+  const content = `
+    <h2>Siparişiniz Onaylandı! ✅</h2>
+    <p>Merhaba ${order.user.firstName},</p>
+    <p><strong>${order.orderNumber}</strong> numaralı siparişiniz onaylanmıştır.</p>
+    
+    <div class="order-details">
+      <p><strong>Ödeme Durumu:</strong> Ödeme Alındı</p>
+      <p><strong>Onay Tarihi:</strong> ${order.paidAt ? new Date(order.paidAt).toLocaleDateString('tr-TR') : 'Bilinmiyor'}</p>
+    </div>
+
+    <p>Siparişiniz hazırlanmaya başlanmıştır. Kargoya verildiğinde bilgilendirileceksiniz.</p>
+
+    <a href="${process.env.FRONTEND_URL}/siparis/${order.id}" class="button">
+      Sipariş Detaylarını Gör
+    </a>
+  `;
+
+  return baseTemplate(content);
+};
+
+export const orderDeliveredEmail = (order: OrderWithRelations) => {
+  const content = `
+    <h2>Siparişiniz Teslim Edildi! 🎉</h2>
+    <p>Merhaba ${order.user.firstName},</p>
+    <p><strong>${order.orderNumber}</strong> numaralı siparişiniz teslim edilmiştir.</p>
+    
+    <div class="order-details">
+      <p><strong>Teslim Tarihi:</strong> ${order.deliveredAt ? new Date(order.deliveredAt).toLocaleDateString('tr-TR') : 'Bilinmiyor'}</p>
+    </div>
+
+    <p>Ürünlerimizi beğendiğinizi umuyoruz! Deneyiminizi bizimle paylaşmak isterseniz yorum bırakabilirsiniz.</p>
+
+    <a href="${process.env.FRONTEND_URL}/siparis/${order.id}" class="button">
+      Sipariş Detaylarını Gör
+    </a>
+
+    <p>Bizi tercih ettiğiniz için teşekkür ederiz!</p>
+  `;
+
+  return baseTemplate(content);
+};
+
 export const passwordResetEmail = (firstName: string, resetToken: string) => {
   const resetUrl = `${process.env.FRONTEND_URL}/sifre-sifirla?token=${resetToken}`;
 

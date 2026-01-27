@@ -26,38 +26,43 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const fetchCart = async () => {
         try {
             const token = localStorage.getItem('authToken');
-            if (!token) {
-                console.log('fetchCart: Token yok');
-                return;
+            
+            if (token) {
+                const response = await apiClient.get('/cart');
+
+                const backendItems = response.data.data?.cart?.items || [];
+
+                const formattedItems: CartUIItem[] = backendItems.map((item: CartItem) => {
+                    const originalPrice = Number(item.variant.price);
+                    const discount = item.variant.discount;
+                    // Calculate discounted price if discount exists
+                    const finalPrice = discount && discount > 0 
+                        ? Math.round(originalPrice * (1 - discount / 100))
+                        : originalPrice;
+
+                    return {
+                        id: item.variant.product.id,
+                        name: item.variant.product.name,
+                        description: item.variant.product.description || '',
+                        price: finalPrice,
+                        image: item.variant.product.photos?.[0]?.url || '/placeholder.png',
+                        quantity: item.quantity,
+                        aroma: item.variant.aroma,
+                        size: item.variant.size || item.variantId,
+                        variantId: item.variantId,
+                        slug: item.variant.product.slug,
+                        categorySlug: '',
+                        cartItemId: item.id
+                    };
+                });
+
+                setItems(formattedItems);
+            } else {
+                const guestCart = localStorage.getItem('guestCart');
+                if (guestCart) {
+                    setItems(JSON.parse(guestCart));
+                }
             }
-
-            console.log('fetchCart: Backend\'den cart çekiliyor...');
-            const response = await apiClient.get('/cart');
-            console.log('fetchCart response:', response.data);
-
-            const backendItems = response.data.data?.cart?.items || [];
-            console.log('fetchCart backend items:', backendItems);
-
-            const formattedItems: CartUIItem[] = backendItems.map((item: CartItem) => {
-                console.log('Mapping item:', item);
-                return {
-                    id: item.variant.product.id,
-                    name: item.variant.product.name,
-                    description: item.variant.product.description || '',
-                    price: Number(item.variant.price),
-                    image: item.variant.product.photos?.[0]?.url || '/placeholder.png',
-                    quantity: item.quantity,
-                    aroma: item.variant.aroma,
-                    size: item.variant.size || item.variantId,
-                    variantId: item.variantId,
-                    slug: item.variant.product.slug,
-                    categorySlug: '',
-                    cartItemId: item.id
-                };
-            });
-
-            console.log('fetchCart formatted items:', formattedItems);
-            setItems(formattedItems);
         } catch (error) {
             console.error('Failed to fetch cart:', error);
         }
@@ -71,59 +76,95 @@ export function CartProvider({ children }: { children: ReactNode }) {
         console.log('addToCart çağrıldı:', { newItem, quantity });
         try {
             const token = localStorage.getItem('authToken');
-            console.log('Token:', token ? 'VAR' : 'YOK');
-            console.log('variantId:', newItem.variantId);
 
-            if (!token || !newItem.variantId) {
-                console.error('No token or variantId', { token: !!token, variantId: newItem.variantId });
+
+            if (!newItem.variantId) {
+                console.error('variantId yok');
                 return;
             }
 
-            console.log('Backend\'e cart item ekleniyor...');
-            const response = await apiClient.post('/cart/items', {
-                variantId: newItem.variantId,
-                quantity
-            });
-            console.log('Backend response:', response.data);
+            if (token) {
+                const response = await apiClient.post('/cart/items', {
+                    variantId: newItem.variantId,
+                    quantity
+                });
+                await fetchCart();
+            } else {
+                const existingItemIndex = items.findIndex(item => item.variantId === newItem.variantId);
+                let updatedItems: CartUIItem[];
+                
+                if (existingItemIndex > -1) {
+                    updatedItems = [...items];
+                    updatedItems[existingItemIndex].quantity += quantity;
+                } else {
+                    updatedItems = [...items, { ...newItem, quantity, cartItemId: Date.now() }];
+                }
+                
+                setItems(updatedItems);
+                localStorage.setItem('guestCart', JSON.stringify(updatedItems));
+            }
 
-            await fetchCart();
             setIsOpen(true);
             setShowAlert(true);
             setTimeout(() => setShowAlert(false), 3000);
         } catch (error) {
-            console.error('Backend cart add failed:', error);
+            console.error('Cart add failed:', error);
         }
     };
 
-    const removeFromCart = async (variantId: number) => {
+    const removeFromCart = async (cartItemId: number) => {
         try {
-            await apiClient.delete(`/cart/items/${variantId}`);
-            await fetchCart();
+            const token = localStorage.getItem('authToken');
+            
+            if (token) {
+                await apiClient.delete(`/cart/items/${cartItemId}`);
+                await fetchCart();
+            } else {
+                const updatedItems = items.filter(item => item.cartItemId !== cartItemId);
+                setItems(updatedItems);
+                localStorage.setItem('guestCart', JSON.stringify(updatedItems));
+            }
         } catch (error) {
-            console.error('Backend cart remove failed:', error);
+            console.error('Cart remove failed:', error);
         }
     };
 
-    const updateQuantity = async (variantId: number, quantity: number) => {
+    const updateQuantity = async (cartItemId: number, quantity: number) => {
         if (quantity <= 0) {
-            removeFromCart(variantId);
+            removeFromCart(cartItemId);
             return;
         }
 
         try {
-            await apiClient.put(`/cart/items/${variantId}`, { quantity });
-            await fetchCart();
+            const token = localStorage.getItem('authToken');
+            
+            if (token) {
+                await apiClient.put(`/cart/items/${cartItemId}`, { quantity });
+                await fetchCart();
+            } else {
+                const updatedItems = items.map(item => 
+                    item.cartItemId === cartItemId ? { ...item, quantity } : item
+                );
+                setItems(updatedItems);
+                localStorage.setItem('guestCart', JSON.stringify(updatedItems));
+            }
         } catch (error) {
-            console.error('Backend cart update failed:', error);
+            console.error('Cart update failed:', error);
         }
     };
 
     const clearCart = async () => {
         try {
-            await apiClient.delete('/cart');
+            const token = localStorage.getItem('authToken');
+            
+            if (token) {
+                await apiClient.delete('/cart');
+            } else {
+                localStorage.removeItem('guestCart');
+            }
             setItems([]);
         } catch (error) {
-            console.error('Backend cart clear failed:', error);
+            console.error('Cart clear failed:', error);
         }
     };
 

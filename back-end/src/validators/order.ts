@@ -8,6 +8,10 @@ export const createOrderSchema = z.object({
         .positive({ message: 'Adres ID pozitif olmalı' }),
 
     paymentMethod: z.string().optional(),
+    
+    shippingMethodCode: z
+        .string({ message: 'Kargo metodu gerekli' })
+        .min(1, { message: 'Kargo metodu boş olamaz' }),
 });
 
 

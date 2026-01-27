@@ -98,13 +98,11 @@ export default function CheckoutPage() {
 
         try {
             if ('id' in editingAddress && editingAddress.id) {
-                // Güncelleme
-                await addressService.updateAddress(editingAddress.id, editingAddress as any);
+                await addressService.updateAddress(editingAddress.id, editingAddress as Partial<UserAddress>);
                 const updatedAddresses = await addressService.getMyAddresses();
                 setAddresses(updatedAddresses);
             } else {
-                // Yeni adres
-                await addressService.createAddress(editingAddress as any);
+                await addressService.createAddress(editingAddress as Omit<UserAddress, 'id'>);
                 const updatedAddresses = await addressService.getMyAddresses();
                 setAddresses(updatedAddresses);
             }
@@ -143,13 +141,14 @@ export default function CheckoutPage() {
                 shippingMethodCode: selectedShipping
             };
 
-            await apiClient.post('/orders', orderData);
+            const response = await apiClient.post('/orders', orderData);
+            const orderId = response.data.data.id;
 
-            alert('Siparişiniz alındı!');
-            navigate('/hesabim/siparislerim');
-        } catch (error: any) {
-            console.error('Sipariş oluşturma hatası:', error);
-            alert(error.response?.data?.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+
+            navigate(`/siparis-basarili/${orderId}`);
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            alert(err.response?.data?.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
         } finally {
             setIsSubmitting(false);
         }
@@ -469,11 +468,17 @@ export default function CheckoutPage() {
                             items.map((item) => (
                                 <div key={item.id} className="flex gap-4 items-start">
                                     <div className="relative w-16 h-16 bg-white border border-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <img
-                                            src={item.image}
-                                            alt={item.name}
-                                            className="w-12 h-12 object-contain"
-                                        />
+                                        <Link to={`/urun/${item.categorySlug || 'urunler'}/${item.slug || item.id}`}>
+                                            <img
+                                                src={`${import.meta.env.VITE_BACKEND_BASE_URL}${item.image}`}
+                                                alt={item.name}
+                                                className="w-12 h-12 object-contain"
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    target.src = '/placeholder.png';
+                                                }}
+                                            />
+                                        </Link>
                                         <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#1F23AA] text-white text-xs font-bold rounded-full flex items-center justify-center">
                                             {item.quantity}
                                         </div>
@@ -513,19 +518,15 @@ export default function CheckoutPage() {
                                     : '0 TL'}
                             </span>
                         </div>
-                        <div className="flex justify-between items-center text-gray-600">
-                            <span className="text-sm">KDV (%20)</span>
-                            <span className="font-medium">{(totalPrice * 0.20).toLocaleString('tr-TR')} TL</span>
                         </div>
-                    </div>
 
                     <div className="border-t border-gray-200 pt-6">
                         <div className="flex justify-between items-center">
-                            <span className="text-lg font-bold text-gray-900">Toplam (KDV Dahil)</span>
+                            <span className="text-lg font-bold text-gray-900">Toplam</span>
                             <span className="text-xl font-bold text-gray-900">
                                 {(() => {
                                     const shippingPrice = Number(shippingMethods.find(m => m.code === selectedShipping)?.price || 0);
-                                    const total = (totalPrice * 1.20) + shippingPrice;
+                                    const total = totalPrice + shippingPrice;
                                     return total.toLocaleString('tr-TR');
                                 })()} TL
                             </span>

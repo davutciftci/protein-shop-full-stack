@@ -1,7 +1,7 @@
 import prisma from '../utils/prisma';
 import { NotFoundError, BadRequestError, UnauthorizedError } from '../utils/customErrors';
 import { OrderStatus } from '../../generated/prisma';
-import { sendOrderCancelledEmail, sendOrderConfirmationEmail, sendOrderShippedEmail } from './mail';
+import { sendOrderCancelledEmail, sendOrderConfirmationEmail, sendOrderShippedEmail, sendOrderConfirmedEmail, sendOrderDeliveredEmail } from './mail';
 import { OrderWithRelations } from '../types';
 
 const generateOrderNumber = async (): Promise<string> => {
@@ -126,7 +126,8 @@ export const getOrderById = async (id: number) => {
 export const createOrder = async (
     userId: number,
     addressId: number,
-    paymentMethod: string
+    paymentMethod: string,
+    shippingMethodCode: string
 ) => {
     const address = await prisma.userAddress.findUnique({
         where: { id: addressId },
@@ -169,13 +170,32 @@ export const createOrder = async (
         }
     }
 
+    // Helper function to calculate discounted price
+    const calculateDiscountedPrice = (price: number, discount?: number | null): number => {
+        if (!discount || discount <= 0) {
+            return price;
+        }
+        return Math.round(price * (1 - discount / 100));
+    };
+
     const subtotal = cart.items.reduce((total, item) => {
-        return total + (Number(item.variant.price) * item.quantity);
+        const originalPrice = Number(item.variant.price);
+        const discount = item.variant.discount;
+        const discountedPrice = calculateDiscountedPrice(originalPrice, discount);
+        return total + (discountedPrice * item.quantity);
     }, 0);
 
-    const shippingCost = subtotal > 500 ? 0 : 50;
-    const taxAmount = subtotal * 0.18;
-    const totalAmount = subtotal + shippingCost + taxAmount;
+    // Kargo metodunu bul
+    const shippingMethod = await prisma.shippingMethod.findUnique({
+        where: { code: shippingMethodCode }
+    });
+
+    if (!shippingMethod) {
+        throw new Error('Geçersiz kargo metodu');
+    }
+
+    const shippingCost = Number(shippingMethod.price);
+    const totalAmount = subtotal + shippingCost;
 
     const shippingAddressSnapshot = {
         title: address.title,
@@ -196,7 +216,7 @@ export const createOrder = async (
                 userId,
                 subtotal,
                 shippingCost,
-                taxAmount,
+                taxAmount: 0,
                 totalAmount,
                 shippingAddress: shippingAddressSnapshot,
                 paymentMethod,
@@ -217,6 +237,10 @@ export const createOrder = async (
                 variantServings: item.variant.servings,
             };
 
+            const originalPrice = Number(item.variant.price);
+            const discount = item.variant.discount;
+            const discountedPrice = calculateDiscountedPrice(originalPrice, discount);
+
             await tx.orderItem.create({
                 data: {
                     orderId: newOrder.id,
@@ -225,9 +249,9 @@ export const createOrder = async (
                     productName: item.variant.product.name,
                     variantName: item.variant.name,
                     sku: item.variant.sku,
-                    price: item.variant.price,
+                    price: discountedPrice,
                     quantity: item.quantity,
-                    subtotal: Number(item.variant.price) * item.quantity,
+                    subtotal: discountedPrice * item.quantity,
                     productSnapshot,
                 },
             });
@@ -310,11 +334,24 @@ export const updateOrderStatus = async (
         data: updateData,
     });
 
+
     const fullOrder = await getOrderById(orderId);
+
+    if (status === OrderStatus.CONFIRMED) {
+        sendOrderConfirmedEmail(fullOrder as OrderWithRelations).catch(err => {
+            console.error('[OrderService] Failed to send order confirmed email: ', err);
+        });
+    }
 
     if (status === OrderStatus.SHIPPED) {
         sendOrderShippedEmail(fullOrder as OrderWithRelations).catch(err => {
             console.error('[OrderService] Failed to send order shipped email: ', err);
+        });
+    }
+
+    if (status === OrderStatus.DELIVERED) {
+        sendOrderDeliveredEmail(fullOrder as OrderWithRelations).catch(err => {
+            console.error('[OrderService] Failed to send order delivered email: ', err);
         });
     }
 
