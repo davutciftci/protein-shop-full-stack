@@ -70,14 +70,14 @@ const baseTemplate = (content: string) => `
 <body>
   <div class="container">
     <div class="header">
-      <h1>🏋️DC Protein Shop</h1>
+      <h1>🏋️OJS NUTRITION</h1>
     </div>
     <div class="content">
       ${content}
     </div>
     <div class="footer">
       <p>Bu email otomatik olarak gönderilmiştir. Lütfen yanıtlamayın.</p>
-      <p>&copy; 2026 DC Protein Shop. Tüm hakları saklıdır.</p>
+      <p>&copy; 2026 OJS NUTRITION. Tüm hakları saklıdır.</p>
     </div>
   </div>
 </body>
@@ -87,7 +87,7 @@ const baseTemplate = (content: string) => `
 export const welcomeEmail = (firstName: string) => {
   const content = `
     <h2>Hoş Geldiniz ${firstName}! 🎉</h2>
-    <p>DC Protein Shop ailesine katıldığınız için teşekkür ederiz!</p>
+    <p>OJS NUTRITION ailesine katıldığınız için teşekkür ederiz!</p>
     <p>Hesabınız başarıyla oluşturuldu. Artık en kaliteli protein ürünlerine kolayca ulaşabilirsiniz.</p>
     <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}" class="button text-white">
       Alışverişe Başla
@@ -301,7 +301,7 @@ export const verificationEmail = (firstName: string, code: string) => {
   const content = `
     <h2>Doğrulama Kodunuz</h2>
     <p>Merhaba ${firstName},</p>
-    <p>DC Protein Shop'a kaydolduğunuz için teşekkürler! Üyeliğinizi tamamlamak için lütfen aşağıdaki 6 haneli doğrulama kodunu kullanın:</p>
+    <p>OJS NUTRITION'a kaydolduğunuz için teşekkürler! Üyeliğinizi tamamlamak için lütfen aşağıdaki 6 haneli doğrulama kodunu kullanın:</p>
     
     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
       <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #2563eb;">${code}</span>
